@@ -1,0 +1,79 @@
+{
+  "phases": {
+    "ƏVVƏL": {
+      "label": "2025 (zolaqlar: 2025 versiyası, məntəqələr: 12 iyul siyahısı)",
+      "lanes_km": 44.2,
+      "parkings": 649,
+      "disconnected": 522,
+      "network_parts": 1,
+      "coverage_pop": 167928,
+      "hubs": 0,
+      "cost_azn": 0,
+      "coverage_pct": 6.8
+    },
+    "İNDİ": {
+      "label": "2026 (zolaqlar: 2025 + 2026, məntəqələr: + 11 sentyabr)",
+      "lanes_km": 64.1,
+      "parkings": 831,
+      "disconnected": 571,
+      "network_parts": 2,
+      "coverage_pop": 253239,
+      "hubs": 0,
+      "cost_azn": 0,
+      "coverage_pct": 10.2
+    },
+    "GƏLƏCƏK": {
+      "label": "Optimal ssenari tətbiq olunduqdan sonra (proqnoz)",
+      "lanes_km": 75.5,
+      "parkings": 831,
+      "disconnected": 541,
+      "network_parts": 1,
+      "coverage_pop": 320840,
+      "hubs": 6,
+      "cost_azn": 962705,
+      "coverage_pct": 12.9
+    }
+  },
+  "pop_total": 2478479,
+  "newly_connected": 30,
+  "selected_km": 11.39,
+  "capex_azn": 962705,
+  "maintenance_azn_year": 77016,
+  "saving_lanes_azn": 602800,
+  "saving_parking_azn": 77500,
+  "all_connections_cost_azn": 886205,
+  "azn_per_new_connection": 32090,
+  "months": 8,
+  "network_before": {
+    "n": 2,
+    "sizes_km": [
+      61.3,
+      2.85
+    ],
+    "total_km": 64.1,
+    "largest_km": 61.3
+  },
+  "network_after": {
+    "n": 1,
+    "sizes_km": [
+      75.53
+    ],
+    "total_km": 75.5,
+    "largest_km": 75.5
+  },
+  "density_levels": {
+    "aşağı": 13953,
+    "orta": 1304,
+    "orta-yüksək": 254,
+    "yüksək": 106
+  },
+  "density_max": 49,
+  "cleaning_log": [
+    "Velo məntəqələri faylı: 844 nöqtə, Bakıdan kənar 10 nöqtə silindi (Google Earth nümunə nöqtələri).",
+    "Velo zolaqları: 2025 versiyasında 44, 2026 versiyasında 60 seqment; təkrarlar silindikdən sonra 67 unikal seqment.",
+    "Velo məntəqələri: 12 iyul siyahısı 649, 11 sentyabr siyahısı ilə birlikdə 831 unikal məntəqə.",
+    "Avtobus trayektoriyaları: 270 xətt hissəsi, 239 unikal xətt.",
+    "Avtovağzallar: 69 nöqtə, 4-i Bakı ərazisində.",
+    "Mikromobillik təklif faylı: 5 küçə oxundu (2-ci sətir daxil)."
+  ]
+}
