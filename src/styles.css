@@ -228,6 +228,25 @@ body { font-size: 14px; }
 .hero-meta b { color: #fff; font-size: 23px; font-weight: 800; line-height: 1.15; letter-spacing: -.035em; text-shadow: 0 1px 16px rgba(0, 0, 0, .22); }
 .hero-meta span { margin-top: 8px; color: #747f94; font-size: 14px; font-weight: 600; line-height: 1.35; }
 .layer-check .icon { width: 14px; height: 14px; margin: 0; }
+
+/* Unified multimodal system cue used in the hero. It makes the product
+   proposition visible before the user opens any secondary view. */
+.hero-banner { min-height: 355px; }
+.hero-copy { max-width: 710px; }
+.system-flow { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.system-flow > i { color: #7d88aa; font-size: 18px; font-style: normal; }
+.mode-chip { display: inline-flex; align-items: center; gap: 7px; min-height: 34px; padding: 0 10px; border: 1px solid #ffffff1f; border-radius: 9px; color: #dbe1f2; background: #ffffff0b; font-size: 14px; font-weight: 700; }
+.mode-chip .icon { color: #a9a3ff; }
+.mode-chip:nth-of-type(3) .icon { color: #6fe6b5; }
+.mode-chip:nth-of-type(5) .icon { color: #73d7ee; }
+.mode-chip:nth-of-type(7) .icon { color: #f6c96d; }
+
+@media (max-width: 560px) {
+  .hero-banner { min-height: 385px; }
+  .system-flow { gap: 7px; }
+  .system-flow > i { display: none; }
+  .mode-chip { min-height: 32px; padding: 0 8px; }
+}
 .section-header p,
 .hero-copy p,
 .hero-meta span,
