@@ -37,11 +37,11 @@ export function AreaChart({ values, labels, color = '#7c6cff', suffix = '%' }) {
   </svg>
 }
 
-export function DonutChart({ segments, centerLabel, centerValue }) {
+export function DonutChart({ segments, centerLabel, centerValue, className = '' }) {
   const total = segments.reduce((sum, segment) => sum + segment.value, 0) || 1
   let cursor = 0
   const gradient = segments.map((segment, index) => { const start = cursor / total * 100; cursor += segment.value; const end = cursor / total * 100; return `${palette[index % palette.length]} ${start}% ${end}%` }).join(', ')
-  return <div className="donut-wrap"><div className="donut" style={{ background: `conic-gradient(${gradient})` }}><div className="donut-hole"><strong>{centerValue}</strong><span>{centerLabel}</span></div></div><div className="legend-list">{segments.map((segment, index) => <div className="legend-row" key={segment.label}><span className="legend-dot" style={{ background: palette[index % palette.length] }} /><span className="legend-label">{segment.label}</span><b>{segment.value.toLocaleString('az-AZ')} ₼</b></div>)}</div></div>
+  return <div className={`donut-wrap ${className}`.trim()}><div className="donut" role="img" aria-label={`${centerLabel}: ${centerValue}`} style={{ background: `conic-gradient(${gradient})` }}><div className="donut-hole"><strong>{centerValue}</strong><span>{centerLabel}</span></div></div><div className="legend-list">{segments.map((segment, index) => <div className="legend-row" key={segment.label}><span className="legend-dot" style={{ background: palette[index % palette.length] }} /><span className="legend-label">{segment.label}</span><b>{segment.value.toLocaleString('az-AZ')} ₼</b></div>)}</div></div>
 }
 
 export function Bars({ items, valueKey = 'value', color = '#7c6cff', formatter = (value) => value.toLocaleString('az-AZ') }) {

@@ -306,3 +306,23 @@ body { font-size: 14px; }
   .hero-meta div { min-width: 120px; }
   .hero-meta b { font-size: 20px; }
 }
+
+/* Finance view switch: keep the same data readable as a list or a part-to-whole chart. */
+.finance-panel-actions { display: flex; align-items: center; gap: 8px; }
+.expense-view-toggle { display: inline-flex; align-items: center; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: #f7f8fb; }
+.expense-view-toggle button { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 0 10px; border-radius: 6px; color: #747f94; background: transparent; font-size: 14px; font-weight: 600; }
+.expense-view-toggle button.active { color: var(--purple); background: #fff; box-shadow: 0 2px 8px #27365312; }
+.finance-donut { min-height: 300px; gap: 48px; }
+.finance-donut .donut { width: 230px; height: 230px; flex-basis: 230px; }
+.finance-donut .donut::after { inset: 18px; }
+.finance-donut .donut-hole strong { max-width: 190px; font-size: 25px; text-align: center; }
+.finance-donut .donut-hole span { font-size: 14px; }
+.finance-donut .legend-list { max-width: 480px; gap: 15px; }
+.finance-donut .legend-row { grid-template-columns: 9px 1fr auto; gap: 10px; font-size: 14px; }
+.finance-donut .legend-row b { font-size: 14px; }
+
+@media (max-width: 560px) {
+  .finance-panel-actions { align-items: flex-end; flex-wrap: wrap; }
+  .finance-donut { min-height: 0; flex-direction: column; gap: 24px; }
+  .finance-donut .legend-list { width: 100%; max-width: none; }
+}
