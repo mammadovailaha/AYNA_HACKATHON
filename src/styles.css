@@ -174,7 +174,7 @@ body { font-size: 14px; }
 .map-layer-toggle:hover { background: #f3f5fa; border-color: #e5e9f0; }
 .map-layer-toggle.active { color: #344158; background: #f7f8fc; border-color: #e3e7ef; }
 .map-layer-toggle.inactive { color: #a4adbb; opacity: .8; }
-.layer-check { width: 20px; height: 20px; display: grid; place-items: center; border: 1px solid #cbd2de; border-radius: 6px; color: #fff; background: #fff; }
+.layer-check { width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 1px solid #cbd2de; border-radius: 6px; color: #fff; background: #fff; line-height: 0; }
 .map-layer-toggle.active .layer-check { border-color: var(--purple); background: var(--purple); }
 .map-layer-toggle.inactive .layer-check { background: #f4f6f9; }
 .map-layer-toggle .map-line, .map-layer-toggle .map-dot { flex: 0 0 auto; }
@@ -186,3 +186,33 @@ body { font-size: 14px; }
 .status-badge { border-radius: var(--radius-sm); }
 .metric-card { padding: 20px; }
 .panel { padding: var(--space-4); }
+
+/* High-contrast hero metrics, consistent descriptions, and centered map checks. */
+.hero-meta { gap: 42px; }
+.hero-meta div { min-width: 150px; }
+.hero-meta b { color: #fff; font-size: 23px; font-weight: 800; line-height: 1.15; letter-spacing: -.035em; text-shadow: 0 1px 16px rgba(0, 0, 0, .22); }
+.hero-meta span { margin-top: 8px; color: #747f94; font-size: 14px; font-weight: 600; line-height: 1.35; }
+.layer-check .icon { width: 14px; height: 14px; margin: 0; }
+.section-header p,
+.hero-copy p,
+.hero-meta span,
+.panel-header p,
+.metric-change-label,
+.chart-footnote,
+.hub-main span,
+.hub-pop span,
+.selected-hub-main p,
+.finance-hero p,
+.finance-hero-stats span,
+.finance-bar small,
+.timeline-item small,
+.savings-card p,
+.compare-footer,
+.map-footer,
+.assumption-note { color: #747f94; }
+
+@media (max-width: 560px) {
+  .hero-meta { gap: 18px; }
+  .hero-meta div { min-width: 120px; }
+  .hero-meta b { font-size: 20px; }
+}
