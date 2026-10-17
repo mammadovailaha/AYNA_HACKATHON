@@ -7,6 +7,7 @@ import { useDashboardData } from './hooks/useDashboardData'
 const navItems = [
   { id: 'overview', label: 'Ümumi baxış', icon: 'grid' },
   { id: 'map', label: 'GIS xəritə', icon: 'map' },
+  { id: 'before-after', label: 'Before / After', icon: 'route' },
   { id: 'connections', label: 'Prioritet bağlantılar', icon: 'route' },
   { id: 'hubs', label: 'Optimal hablar', icon: 'pin' },
   { id: 'finance', label: 'Maliyyə', icon: 'wallet' }
@@ -40,6 +41,7 @@ function App() {
       <div className="content-wrap">
         {activeView === 'overview' && <Overview summary={summary} connections={connections} hubs={hubs} finance={finance} />}
         {activeView === 'map' && <MapView summary={summary} />}
+        {activeView === 'before-after' && <BeforeAfterView summary={summary} />}
         {activeView === 'connections' && <ConnectionsView connections={connections} />}
         {activeView === 'hubs' && <HubsView hubs={hubs} />}
         {activeView === 'finance' && <FinanceView summary={summary} finance={finance} />}
@@ -67,6 +69,18 @@ function Overview({ summary, connections, hubs, finance }) {
 function MapView({ summary }) {
   const future = summary.phases['GƏLƏCƏK']
   return <><SectionHeader eyebrow="GIS ANALİTİKA" title="Şəbəkə xəritəsi" description="Mövcud zolaqlar, seçilmiş yeni bağlantılar, əlaqəsiz məntəqələr və optimal hublar." action={<div className="header-actions"><button className="secondary-button"><Icon name="filter" size={15} /> Laylar</button><button className="primary-button"><Icon name="external" size={15} /> Tam xəritəni aç</button></div>} /><Panel className="map-panel"><div className="map-toolbar"><div className="map-legend"><span><i className="map-line existing" /> Mövcud zolaq</span><span><i className="map-line proposed" /> Yeni bağlantı</span><span><i className="map-dot disconnected" /> Əlaqəsiz məntəqə</span><span><i className="map-dot hub" /> Optimal hub</span></div><StatusBadge tone="purple">Vahid şəbəkə · {future.lanes_km} km</StatusBadge></div><div className="map-frame"><iframe title="AXIN xəritəsi" src="/processed/xerite_after.html" /></div><div className="map-footer"><span><b>{future.network_parts}</b> şəbəkə hissəsi</span><span><b>{future.hubs}</b> optimal hub</span><span><b>{future.disconnected}</b> əlaqəsiz məntəqə</span><span className="map-note">Xəritə: OSM + hakaton dataları</span></div></Panel></>
+}
+
+function BeforeAfterView({ summary }) {
+  const before = summary.phases['ƏVVƏL']
+  const after = summary.phases['GƏLƏCƏK']
+  const comparison = [
+    { label: 'Velo zolaqları', before: `${fmt(before.lanes_km, 1)} km`, after: `${fmt(after.lanes_km, 1)} km` },
+    { label: 'Şəbəkə əhatəsi', before: `${fmt(before.coverage_pct, 1)}%`, after: `${fmt(after.coverage_pct, 1)}%` },
+    { label: 'Əlaqəsiz məntəqə', before: fmt(before.disconnected), after: fmt(after.disconnected) },
+    { label: 'Şəbəkə hissələri', before: before.network_parts, after: after.network_parts }
+  ]
+  return <><SectionHeader eyebrow="SENARİ ANALİZİ" title="Before / After" description="2025-ci ildəki mövcud vəziyyət ilə AXIN inkişaf ssenarisinin şəhər şəbəkəsinə təsirini yan-yana müqayisə edin." action={<StatusBadge tone="mint">+{fmt(after.lanes_km - before.lanes_km, 1)} km · vahid şəbəkə</StatusBadge>} /><div className="comparison-grid">{comparison.map((item) => <div className="comparison-stat" key={item.label}><span>{item.label}</span><div><b>{item.before}</b><Icon name="chevron" size={14} /><strong>{item.after}</strong></div></div>)}</div><div className="before-after-grid"><Panel className="compare-panel"><div className="compare-heading"><div><span className="eyebrow">ƏVVƏL · 2025</span><h3>Mövcud şəbəkə</h3></div><StatusBadge tone="gray">{before.network_parts} hissə</StatusBadge></div><div className="compare-map"><iframe title="2025 mövcud şəbəkə xəritəsi" src="/processed/xerite_before.html" /></div><div className="compare-footer"><span><b>{fmt(before.lanes_km, 1)} km</b> zolaq</span><span><b>{fmt(before.disconnected)}</b> əlaqəsiz məntəqə</span><span><b>{fmt(before.coverage_pct, 1)}%</b> əhatə</span></div></Panel><Panel className="compare-panel after"><div className="compare-heading"><div><span className="eyebrow mint">SONRA · SSENARİ</span><h3>Vahid inkişaf şəbəkəsi</h3></div><StatusBadge tone="mint">{after.network_parts} hissə</StatusBadge></div><div className="compare-map"><iframe title="İnkişaf ssenarisi xəritəsi" src="/processed/xerite_after.html" /></div><div className="compare-footer"><span><b>{fmt(after.lanes_km, 1)} km</b> zolaq</span><span><b>{fmt(after.disconnected)}</b> əlaqəsiz məntəqə</span><span><b>{fmt(after.coverage_pct, 1)}%</b> əhatə</span></div></Panel></div></>
 }
 
 function ConnectionsView({ connections }) {

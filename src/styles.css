@@ -102,3 +102,48 @@ button { border: 0; cursor: pointer; }
 @media (max-width: 1180px) { .content-wrap { padding-left: 28px; padding-right: 28px; }.topbar { padding: 0 28px; }.hero-banner { padding-left: 35px; }.hero-visual { right: -30px; opacity: .5; }.metric-grid { grid-template-columns: repeat(2, 1fr); }.finance-hero { display: grid; }.finance-hero-stats { justify-content: space-between; }.donut-wrap { gap: 14px; }.donut { width: 125px; height: 125px; flex-basis: 125px; } }
 @media (max-width: 840px) { .sidebar { position: fixed; left: -280px; top: 0; transition: left .25s ease; }.sidebar.open { left: 0; }.sidebar-backdrop { position: fixed; inset: 0; z-index: 9; background: #08102180; }.close-sidebar { display: block; }.mobile-menu { display: grid; }.topbar { gap: 14px; }.top-search { width: 180px; }.dashboard-grid, .hubs-grid, .finance-grid, .overview-grid { grid-template-columns: 1fr; }.wide-panel { grid-column: auto; }.hero-banner { min-height: 310px; }.hero-visual { right: -70px; opacity: .35; }.section-header { align-items: flex-start; flex-direction: column; }.header-actions { width: 100%; }.header-actions .secondary-button, .header-actions .primary-button { flex: 1; justify-content: center; }.map-frame { height: 560px; }.map-footer { flex-wrap: wrap; }.map-footer .map-note { width: 100%; margin-left: 0; }.hub-summary-grid { grid-template-columns: 1fr; } }
 @media (max-width: 560px) { .content-wrap { padding: 25px 16px 45px; }.topbar { height: 63px; padding: 0 16px; }.breadcrumb { font-size: 10px; }.top-search { display: none; }.top-actions { gap: 12px; }.section-header h2 { font-size: 23px; }.hero-banner { padding: 27px 23px; }.hero-copy h1 { font-size: 29px; }.hero-meta { flex-wrap: wrap; gap: 15px; }.hero-meta div { min-width: 100px; }.hero-visual { display: none; }.metric-grid { gap: 10px; }.metric-card { padding: 15px; }.metric-value { font-size: 21px; }.panel { padding: 17px 15px; }.donut-wrap { justify-content: center; flex-wrap: wrap; }.donut { width: 130px; height: 130px; }.legend-list { width: 100%; }.priority-head { display: none; }.priority-row { grid-template-columns: 1.5fr .7fr .7fr; gap: 8px; }.priority-row > :nth-child(4), .priority-row > :nth-child(5) { display: none; }.map-toolbar { align-items: flex-start; flex-direction: column; }.map-footer { gap: 10px; }.map-footer span { width: 48%; padding-right: 0; border: 0; }.finance-hero { padding: 24px 20px; }.finance-hero-stats { align-items: flex-start; flex-direction: column; gap: 14px; }.finance-hero-stats div { width: 100%; }.selected-hub { flex-wrap: wrap; }.hub-score { width: 100%; padding-left: 29px; }.filter-row { flex-wrap: wrap; }.input-search { width: 100%; }.result-count { margin-left: 0; } }
+
+/* Readability pass: dashboard labels were intentionally compact; increase the
+   most frequently read text without changing the information hierarchy. */
+.main-nav button { font-size: 13px; }
+.workspace-switch b { font-size: 12px; }
+.status-card b, .user-card b { font-size: 11px; }
+.status-card small, .user-card small, .brand span { font-size: 10px; }
+.breadcrumb, .top-search { font-size: 12px; }
+.section-header p, .hero-copy p { font-size: 13px; }
+.secondary-button, .primary-button { font-size: 12px; }
+.hero-meta span { font-size: 10px; }
+.metric-label { font-size: 12px; }
+.metric-change { font-size: 11px; }
+.metric-change-label { font-size: 10px; }
+.panel-header h3 { font-size: 14px; }
+.panel-header p { font-size: 11px; }
+.text-button, .status-badge { font-size: 10px; }
+.chart-axis, .chart-label { font-size: 10px; }
+.chart-footnote { font-size: 11px; }
+.legend-row { font-size: 10px; }
+.priority-head { font-size: 10px; }
+.priority-row { font-size: 11px; }
+.priority-row strong { font-size: 12px; }
+.priority-row small, .data-table td small { font-size: 10px; }
+.data-table th { font-size: 10px; }
+.data-table td { font-size: 11px; }
+.data-table td strong { font-size: 12px; }
+.map-legend, .map-footer { font-size: 11px; }
+.hub-main strong { font-size: 12px; }
+.hub-main span, .hub-pop span { font-size: 10px; }
+.selected-hub-main h3 { font-size: 13px; }
+.selected-hub-main p, .hub-score span { font-size: 10px; }
+.bar-meta, .finance-bar-top { font-size: 11px; }
+.finance-bar small, .timeline-item small { font-size: 10px; }
+
+.comparison-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 15px; }
+.comparison-stat { padding: 17px 19px; border: 1px solid var(--line); border-radius: 13px; background: #fff; }
+.comparison-stat > span { display: block; color: #8a95a8; font-size: 11px; font-weight: 600; }
+.comparison-stat > div { display: flex; align-items: center; gap: 9px; margin-top: 12px; }
+.comparison-stat b, .comparison-stat strong { font: 600 16px 'DM Mono', monospace; }
+.comparison-stat b { color: #8b95a8; }.comparison-stat strong { color: #17a975; }.comparison-stat svg { color: #c0c7d2; }
+.before-after-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
+.compare-panel { padding: 0; overflow: hidden; }.compare-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 15px; padding: 21px 22px 17px; }.compare-heading h3 { margin: 7px 0 0; color: #202a3e; font-size: 16px; letter-spacing: -.03em; }.compare-panel.after .compare-heading { border-top: 3px solid var(--mint); }.compare-panel:not(.after) .compare-heading { border-top: 3px solid #9aa5b6; }.compare-map { height: 540px; background: #e3e9ed; border-top: 1px solid #eef1f5; border-bottom: 1px solid #eef1f5; }.compare-map iframe { width: 100%; height: 100%; border: 0; }.compare-footer { display: flex; flex-wrap: wrap; gap: 0; padding: 15px 21px; color: #8b96a8; font-size: 11px; }.compare-footer span { padding-right: 15px; margin-right: 15px; border-right: 1px solid #e6eaf0; }.compare-footer span:last-child { border: 0; margin-right: 0; }.compare-footer b { color: #46536b; font: 600 12px 'DM Mono', monospace; margin-right: 3px; }
+@media (max-width: 840px) { .comparison-grid, .before-after-grid { grid-template-columns: 1fr 1fr; }.compare-map { height: 430px; } }
+@media (max-width: 560px) { .comparison-grid, .before-after-grid { grid-template-columns: 1fr; }.compare-map { height: 420px; }.comparison-stat > div { justify-content: space-between; } }
