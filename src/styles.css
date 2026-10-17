@@ -85,7 +85,8 @@ button { border: 0; cursor: pointer; }
 .metric-top, .metric-bottom { display: flex; align-items: center; }
 .metric-top { justify-content: space-between; }
 .metric-label { color: #8a95a8; font-size: 11px; font-weight: 600; }
-.metric-icon { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; }
+.metric-icon { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; }
+.metric-icon .icon { width: 20px; height: 20px; }
 .tone-purple .metric-icon { background: #efedff; color: var(--purple); }.tone-mint .metric-icon { background: #e4faf2; color: #18b77b; }.tone-orange .metric-icon { background: #fff4dd; color: #db9a25; }.tone-blue .metric-icon { background: #e6f7fb; color: #1994b4; }
 .metric-value { margin: 11px 0 8px; color: #1d263a; font-size: 24px; font-weight: 800; letter-spacing: -.05em; }
 .metric-bottom { gap: 7px; min-width: 0; }
