@@ -218,6 +218,8 @@ body { font-size: 14px; }
 .status-badge { border-radius: var(--radius-sm); }
 .metric-card { padding: 20px; }
 .panel { padding: var(--space-4); }
+.filter-toggle,
+.filter-toggle.active { font-size: 14px; }
 
 /* High-contrast hero metrics, consistent descriptions, and centered map checks. */
 .hero-meta { gap: 42px; }
