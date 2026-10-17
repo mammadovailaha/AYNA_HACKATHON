@@ -314,7 +314,7 @@ body { font-size: 14px; }
 .expense-view-toggle button.active { color: var(--purple); background: #fff; box-shadow: 0 2px 8px #27365312; }
 .finance-donut { min-height: 300px; gap: 48px; }
 .finance-donut .donut { width: 230px; height: 230px; flex-basis: 230px; }
-.finance-donut .donut::after { inset: 18px; }
+.finance-donut .donut::after { inset: 24px; }
 .finance-donut .donut-hole strong { max-width: 190px; font-size: 25px; text-align: center; }
 .finance-donut .donut-hole span { font-size: 14px; }
 .finance-donut .legend-list { max-width: 480px; gap: 15px; }
