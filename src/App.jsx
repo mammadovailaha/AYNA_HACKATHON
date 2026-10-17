@@ -60,13 +60,32 @@ function Overview({ summary, connections, hubs, finance }) {
   const phases = summary.phases
   const current = phases['İNDİ']
   const future = phases['GƏLƏCƏK']
+  const scenarioYear = current.label.match(/\b\d{4}\b/)?.[0] ?? 'İNDİ'
   const selectedConnections = connections.filter((row) => row.selected)
   const selectedHubs = hubs.filter((row) => row.selected).sort((a, b) => a.rank - b.rank)
   const financeTop = finance.slice().sort((a, b) => b['cəmi_azn'] - a['cəmi_azn']).slice(0, 5).map((row) => ({ label: row['maddə'], value: row['cəmi_azn'] }))
   const coverageChange = ((future.coverage_pct - current.coverage_pct) / current.coverage_pct * 100).toFixed(1)
   return <>
-    <SectionHeader eyebrow="AYNA · QƏRAR MƏRKƏZİ" title="Bakı mikromobillik şəbəkəsi" description="Mövcud vəziyyəti, investisiya prioritetlərini və 2026 inkişaf ssenarisini bir ekranda izləyin." action={<div className="header-actions"><button className="secondary-button"><Icon name="download" size={15} /> Hesabatı yüklə</button><button className="primary-button"><span className="live-dot" /> Ssenari aktivdir</button></div>} />
-    <div className="hero-banner"><div className="hero-copy"><span className="eyebrow mint">2026 İNKİŞAF SSENARİSİ</span><h1>Şəbəkəni birləşdir,<br /><em>şəhəri hərəkətə gətir.</em></h1><p>AXIN analitikası mövcud 64,1 km şəbəkəni 75,5 km vahid şəbəkəyə çevirmək üçün ən yüksək təsirli bağlantıları seçib.</p><div className="hero-meta"><div><b>{money(summary.capex_azn)}</b><span>ümumi kapital xərci</span></div><div><b>{summary.months} ay</b><span>təxmini icra müddəti</span></div><div><b>+{summary.newly_connected}</b><span>yeni qoşulan məntəqə</span></div></div></div><div className="hero-visual"><div className="network-orbit orbit-one" /><div className="network-orbit orbit-two" /><div className="network-core"><Icon name="bike" size={34} /><span>75,5 km</span></div><span className="node n1" /><span className="node n2" /><span className="node n3" /><span className="node n4" /></div></div>
+    <SectionHeader eyebrow="AYNA · QƏRAR MƏRKƏZİ" title="Bakı mikromobillik şəbəkəsi" description={`Mövcud vəziyyəti, investisiya prioritetlərini və ${scenarioYear} inkişaf ssenarisini bir ekranda izləyin.`} action={<div className="header-actions"><button className="secondary-button"><Icon name="download" size={15} /> Hesabatı yüklə</button><button className="primary-button"><span className="live-dot" /> Ssenari aktivdir</button></div>} />
+    <div className="hero-banner">
+      <div className="hero-copy">
+        <span className="eyebrow mint">{scenarioYear} İNKİŞAF SSENARİSİ</span>
+        <h1>Şəbəkəni birləşdir,<br /><em>şəhəri hərəkətə gətir.</em></h1>
+        <p>AXIN analitikası mövcud {fmt(current.lanes_km, 1)} km şəbəkəni {fmt(future.lanes_km, 1)} km vahid şəbəkəyə çevirmək üçün ən yüksək təsirli bağlantıları seçib.</p>
+        <div className="hero-meta">
+          <div><b>{money(summary.capex_azn)}</b><span>ümumi kapital xərci</span></div>
+          <div><b>{summary.months} ay</b><span>təxmini icra müddəti</span></div>
+          <div><b>+{summary.newly_connected}</b><span>yeni qoşulan məntəqə</span></div>
+        </div>
+      </div>
+      <div className="hero-visual" aria-hidden="true">
+        <div className="network-map" />
+        <div className="network-orbit orbit-one" />
+        <div className="network-orbit orbit-two" />
+        <div className="network-core"><Icon name="bike" size={34} /><strong>{fmt(future.lanes_km, 1)} km</strong><span>Ümumi velosiped zolağı</span></div>
+        <span className="node n1" /><span className="node n2" /><span className="node n3" /><span className="node n4" />
+      </div>
+    </div>
     <div className="metric-grid"><MetricCard label="Mövcud velo zolağı" value={`${fmt(current.lanes_km, 1)} km`} change={`+${fmt(future.lanes_km - current.lanes_km, 1)} km`} changeLabel="ssenari sonrası" tone="purple" icon="route" /><MetricCard label="Şəbəkə əhatəsi" value={`${fmt(current.coverage_pct, 1)}%`} change={`+${fmt(future.coverage_pct - current.coverage_pct, 1)}%`} changeLabel={`gələcək · ${coverageChange}% artım`} tone="mint" icon="map" /><MetricCard label="Əlaqəsiz məntəqə" value={fmt(current.disconnected)} change={`-${fmt(current.disconnected - future.disconnected)}`} changeLabel="ssenari sonrası" tone="orange" icon="pin" /><MetricCard label="İllik texniki xidmət" value={money(summary.maintenance_azn_year)} change="8 ay" changeLabel="icra müddəti" tone="blue" icon="wallet" /></div>
     <div className="dashboard-grid overview-grid"><Panel className="coverage-panel"><PanelHeader title="Şəbəkə əhatəsi" subtitle="Əvvəl → indi → inkişaf ssenarisi" action={<StatusBadge tone="mint">+{fmt(future.coverage_pct - current.coverage_pct, 1)} pp</StatusBadge>} /><AreaChart values={phaseKeys.map((key) => phases[key].coverage_pct)} labels={['2025', '2026', 'Ssenari']} /><div className="chart-footnote"><span><i className="legend-dot purple" />Zolaqdan 300 m-də yaşayan sakin</span><b>{fmt(future.coverage_pop)} nəfər</b></div></Panel><Panel><PanelHeader title="İnvestisiya bölgüsü" subtitle="Prioritet istiqamətlər üzrə" action={<button className="more-button"><Icon name="more" size={18} /></button>} /><DonutChart segments={financeTop.slice(0, 4)} centerValue={money(summary.capex_azn)} centerLabel="ümumi" /></Panel><Panel className="wide-panel"><PanelHeader title="Prioritet bağlantılar" subtitle={`${selectedConnections.length} istiqamət seçilib · fayda/xərc nisbətinə görə`} action={<button className="text-button">Hamısına bax <Icon name="chevron" size={14} /></button>} /><div className="priority-table"><div className="priority-head"><span>İSTİQAMƏT</span><span>UZUNLUQ</span><span>YENİ MƏNTƏQƏ</span><span>XƏRC</span><span>STATUS</span></div>{selectedConnections.slice(0, 5).map((row) => <div className="priority-row" key={row.id}><div><strong>{row.name}</strong><small>{row.from} → {row.to}</small></div><b>{fmt(row.length_km, 2)} km</b><b>{row.newly_connected}</b><b>{money(row.cost_azn)}</b><StatusBadge tone="mint">Seçildi</StatusBadge></div>)}</div></Panel><Panel className="wide-panel hub-panel"><PanelHeader title="Optimal hublar" subtitle="Şəbəkə və ictimai nəqliyyatın inteqrasiya nöqtələri" action={<button className="text-button">Detallara bax <Icon name="chevron" size={14} /></button>} /><div className="hub-list">{selectedHubs.slice(0, 4).map((hub) => <div className="hub-item" key={hub.name}><span className="hub-rank">0{hub.rank}</span><div className="hub-main"><strong>{hub.name}</strong><span><Icon name="route" size={13} /> {hub.n_lines} avtobus xətti <i /> <Icon name="pin" size={13} /> {hub.parkings} məntəqə</span></div><div className="hub-pop"><b>{fmt(hub.pop)}</b><span>500 m-də sakin</span></div><Icon name="chevron" size={16} className="muted-icon" /></div>)}</div></Panel></div>
   </>
