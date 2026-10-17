@@ -55,7 +55,7 @@
     
     <script>
     (function(){
-      var b = [[np.float64(40.37515), np.float64(49.796758)], [np.float64(40.420772), np.float64(49.868419)]];
+      var b = [[40.37515, 49.796758], [40.420772, 49.868419]];
       function fit(){ var mp = window['map_e897e69164bde59e823ce7a5a3261740']; if(!mp) return; var s = mp.getSize(); if(s.x < 50 || s.y < 50) return; mp.invalidateSize(); mp.fitBounds(b, {padding:[20,20], maxZoom:15}); }
       var tries = 0, iv = setInterval(function(){ tries++; var mp = window['map_e897e69164bde59e823ce7a5a3261740']; if(mp && mp.getSize().x > 50){ fit(); clearInterval(iv); } if(tries > 120) clearInterval(iv); }, 250);
       window.addEventListener('resize', fit);
@@ -11747,5 +11747,23 @@
                 {"maxZoom": 15, "padding": [20, 20]}
             );
         
+</script>
+<script>
+  (function () {
+    var map = map_e897e69164bde59e823ce7a5a3261740;
+    var layers = {
+      existing: feature_group_f37a293f28130d7e3bac50ae03234a9d,
+      proposed: feature_group_dff4945effc11a48f3757ddfea9bfe59,
+      disconnected: feature_group_e5bf152b51ab6ea86d71e70e569be1b0,
+      hubs: feature_group_9e5856c89f972417fd5ee3a9f56e9b36
+    };
+    window.addEventListener('message', function (event) {
+      var message = event.data || {};
+      var layer = layers[message.layer];
+      if (!layer || message.type !== 'axin-layer-toggle') return;
+      if (message.visible) map.addLayer(layer);
+      else map.removeLayer(layer);
+    });
+  })();
 </script>
 </html>

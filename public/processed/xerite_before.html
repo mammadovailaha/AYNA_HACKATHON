@@ -55,7 +55,7 @@
     
     <script>
     (function(){
-      var b = [[np.float64(40.37515), np.float64(49.796758)], [np.float64(40.420772), np.float64(49.868419)]];
+      var b = [[40.37515, 49.796758], [40.420772, 49.868419]];
       function fit(){ var mp = window['map_ffb4c6bd79b366991dc45c716606e319']; if(!mp) return; var s = mp.getSize(); if(s.x < 50 || s.y < 50) return; mp.invalidateSize(); mp.fitBounds(b, {padding:[20,20], maxZoom:15}); }
       var tries = 0, iv = setInterval(function(){ tries++; var mp = window['map_ffb4c6bd79b366991dc45c716606e319']; if(mp && mp.getSize().x > 50){ fit(); clearInterval(iv); } if(tries > 120) clearInterval(iv); }, 250);
       window.addEventListener('resize', fit);

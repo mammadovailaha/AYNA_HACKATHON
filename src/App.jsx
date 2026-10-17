@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import Icon from './components/Icon'
 import { AreaChart, Bars, DonutChart } from './components/Charts'
 import { EmptyState, MetricCard, Panel, PanelHeader, SectionHeader, StatusBadge } from './components/Ui'
@@ -37,7 +37,7 @@ function App() {
     </aside>
     {sidebarOpen && <button className="sidebar-backdrop" aria-label="Menyunu bağla" onClick={() => setSidebarOpen(false)} />}
     <main className="main-content">
-      <header className="topbar"><button className="mobile-menu" onClick={() => setSidebarOpen(true)}><Icon name="grid" size={20} /></button><div className="breadcrumb"><span>AXIN /</span><b>{viewTitle}</b></div><div className="top-actions"><div className="top-search"><Icon name="search" size={16} /><span>Dashboardda axtar…</span><kbd>⌘ K</kbd></div><button className="icon-button" aria-label="Bildirişlər"><Icon name="bell" size={18} /><i /></button><div className="top-avatar">AY</div></div></header>
+      <header className="topbar"><button className="mobile-menu" onClick={() => setSidebarOpen(true)}><Icon name="grid" size={20} /></button><div className="breadcrumb"><span>AXIN /</span><b>{viewTitle}</b></div><div className="top-actions"><div className="top-search"><Icon name="search" size={16} /><span>Dashboardda axtar…</span><kbd>⌘ K</kbd></div><div className="top-avatar">AY</div></div></header>
       <div className="content-wrap">
         {activeView === 'overview' && <Overview summary={summary} connections={connections} hubs={hubs} finance={finance} />}
         {activeView === 'map' && <MapView summary={summary} />}
@@ -68,7 +68,21 @@ function Overview({ summary, connections, hubs, finance }) {
 
 function MapView({ summary }) {
   const future = summary.phases['GƏLƏCƏK']
-  return <><SectionHeader eyebrow="GIS ANALİTİKA" title="Şəbəkə xəritəsi" description="Mövcud zolaqlar, seçilmiş yeni bağlantılar, əlaqəsiz məntəqələr və optimal hublar." action={<div className="header-actions"><button className="secondary-button"><Icon name="filter" size={15} /> Laylar</button><button className="primary-button"><Icon name="external" size={15} /> Tam xəritəni aç</button></div>} /><Panel className="map-panel"><div className="map-toolbar"><div className="map-legend"><span><i className="map-line existing" /> Mövcud zolaq</span><span><i className="map-line proposed" /> Yeni bağlantı</span><span><i className="map-dot disconnected" /> Əlaqəsiz məntəqə</span><span><i className="map-dot hub" /> Optimal hub</span></div><StatusBadge tone="purple">Vahid şəbəkə · {future.lanes_km} km</StatusBadge></div><div className="map-frame"><iframe title="AXIN xəritəsi" src="/processed/xerite_after.html" /></div><div className="map-footer"><span><b>{future.network_parts}</b> şəbəkə hissəsi</span><span><b>{future.hubs}</b> optimal hub</span><span><b>{future.disconnected}</b> əlaqəsiz məntəqə</span><span className="map-note">Xəritə: OSM + hakaton dataları</span></div></Panel></>
+  const mapFrame = useRef(null)
+  const [layers, setLayers] = useState({ existing: true, proposed: true, disconnected: true, hubs: true })
+  const layerDefinitions = [
+    { key: 'existing', label: 'Mövcud zolaq', marker: 'map-line existing' },
+    { key: 'proposed', label: 'Yeni bağlantı', marker: 'map-line proposed' },
+    { key: 'disconnected', label: 'Əlaqəsiz məntəqə', marker: 'map-dot disconnected' },
+    { key: 'hubs', label: 'Optimal hub', marker: 'map-dot hub' }
+  ]
+  const toggleLayer = (definition) => {
+    const nextVisible = !layers[definition.key]
+    mapFrame.current?.contentWindow?.postMessage({ type: 'axin-layer-toggle', layer: definition.key, visible: nextVisible }, '*')
+    setLayers((current) => ({ ...current, [definition.key]: nextVisible }))
+  }
+  const syncLayers = () => Object.entries(layers).forEach(([layer, visible]) => mapFrame.current?.contentWindow?.postMessage({ type: 'axin-layer-toggle', layer, visible }, '*'))
+  return <><SectionHeader eyebrow="GIS ANALİTİKA" title="Şəbəkə xəritəsi" description="Layer-ləri seçərək mövcud və təklif olunan infrastrukturu ayrıca analiz edin." action={<div className="header-actions"><button className="primary-button"><Icon name="external" size={15} /> Tam xəritəni aç</button></div>} /><Panel className="map-panel"><div className="map-toolbar"><div className="map-legend">{layerDefinitions.map((definition) => <button className={`map-layer-toggle ${layers[definition.key] ? 'active' : 'inactive'}`} key={definition.key} onClick={() => toggleLayer(definition)} aria-pressed={layers[definition.key]}><span className="layer-check">{layers[definition.key] ? <Icon name="check" size={14} /> : <span />}</span><i className={definition.marker} /><span>{definition.label}</span></button>)}</div><StatusBadge tone="purple">Vahid şəbəkə · {future.lanes_km} km</StatusBadge></div><div className="map-frame"><iframe ref={mapFrame} onLoad={syncLayers} title="AXIN xəritəsi" src="/processed/xerite_after.html" /></div><div className="map-footer"><span><b>{future.network_parts}</b> şəbəkə hissəsi</span><span><b>{future.hubs}</b> optimal hub</span><span><b>{future.disconnected}</b> əlaqəsiz məntəqə</span><span className="map-note">Xəritə: OSM + hakaton dataları</span></div></Panel></>
 }
 
 function BeforeAfterView({ summary }) {
