@@ -20,6 +20,7 @@ const phaseKeys = ['ƏVVƏL', 'İNDİ', 'GƏLƏCƏK']
 function App() {
   const { data, loading, error } = useDashboardData()
   const [activeView, setActiveView] = useState('overview')
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   if (loading) return <div className="loading-screen"><div className="loading-mark">AXIN</div><div className="loader" /><p>Dashboard məlumatları hazırlanır…</p></div>
@@ -28,12 +29,17 @@ function App() {
   const { summary, connections, hubs, finance } = data
   const viewTitle = navItems.find((item) => item.id === activeView)?.label ?? 'Ümumi baxış'
 
+  const handleNavClick = (viewId) => {
+    setActiveView(viewId)
+    setSidebarOpen(false)
+  }
+
   return <div className="app-shell">
-    <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
-      <div className="brand"><div className="brand-mark">A</div><div><strong>AXIN</strong><span>Mobility intelligence</span></div><button className="close-sidebar" onClick={() => setSidebarOpen(false)}>×</button></div>
+    <aside className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${sidebarOpen ? 'open' : ''}`}>
+      <div className="brand"><div className="brand-mark">A</div><div className="brand-copy"><strong>AXIN</strong><span>Mobility intelligence</span></div><button className="sidebar-toggle" onClick={() => setSidebarCollapsed((value) => !value)} aria-label={sidebarCollapsed ? 'Sidebarı aç' : 'Sidebarı bağla'} title={sidebarCollapsed ? 'Sidebarı aç' : 'Sidebarı bağla'}><Icon name="chevron" size={17} /></button><button className="close-sidebar" onClick={() => setSidebarOpen(false)} aria-label="Menyunu bağla">×</button></div>
       <div className="workspace-switch"><span className="workspace-dot" /><div><small>WORKSPACE</small><b>Bakı şəhəri</b></div><Icon name="chevron" size={15} /></div>
-      <nav className="main-nav"><span className="nav-caption">İCMAL</span>{navItems.map((item) => <button key={item.id} className={activeView === item.id ? 'active' : ''} onClick={() => { setActiveView(item.id); setSidebarOpen(false) }}><Icon name={item.icon} size={18} /><span>{item.label}</span>{item.id === 'connections' && <em>{connections.filter((row) => row.selected).length}</em>}</button>)}</nav>
-      <div className="sidebar-bottom"><div className="status-card"><span className="live-dot" /><div><b>Live data layer</b><small>17 oktyabr 2026</small></div></div><div className="user-card"><div className="avatar">AY</div><div><b>AYNA analitika</b><small>Admin workspace</small></div><Icon name="more" size={18} /></div></div>
+      <nav className="main-nav"><span className="nav-caption">İCMAL</span>{navItems.map((item) => <button key={item.id} className={activeView === item.id ? 'active' : ''} data-tooltip={item.label} aria-label={item.label} onClick={() => handleNavClick(item.id)}><Icon name={item.icon} size={18} /><span>{item.label}</span>{item.id === 'connections' && <em>{connections.filter((row) => row.selected).length}</em>}</button>)}</nav>
+      <div className="sidebar-bottom"><div className="status-card" data-tooltip="Live data layer"><span className="live-dot" /><div><b>Live data layer</b><small>17 oktyabr 2026</small></div></div><div className="user-card" data-tooltip="AYNA analitika"><div className="avatar">AY</div><div><b>AYNA analitika</b><small>Admin workspace</small></div><Icon name="more" size={18} /></div></div>
     </aside>
     {sidebarOpen && <button className="sidebar-backdrop" aria-label="Menyunu bağla" onClick={() => setSidebarOpen(false)} />}
     <main className="main-content">
