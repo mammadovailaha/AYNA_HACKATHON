@@ -327,3 +327,14 @@ body { font-size: 14px; }
   .finance-donut { min-height: 0; flex-direction: column; gap: 24px; }
   .finance-donut .legend-list { width: 100%; max-width: none; }
 }
+
+/* Final readability pass for finance controls and collapsed navigation. */
+.input-search input,
+.result-count,
+.savings-card,
+.savings-card p { font-size: 14px; }
+.finance-hero-stats b { font-size: 22px; font-weight: 800; line-height: 1.2; }
+.finance-hero-stats span { font-size: 14px; }
+.sidebar.collapsed .main-nav button .icon { width: 22px; height: 22px; }
+.sidebar.collapsed .user-card .avatar { display: none; }
+.sidebar.collapsed .user-card > .icon { display: block; width: 22px; height: 22px; color: #c6cfe3; }
