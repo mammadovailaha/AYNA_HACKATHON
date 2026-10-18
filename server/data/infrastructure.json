@@ -1,0 +1,13 @@
+{
+  "city": "Bakı",
+  "unit": "km",
+  "existing_km": 67.8,
+  "baseline_source": "declared",
+  "planned_addition_km": 11.4,
+  "existing_status": "built",
+  "planned_status": "planned",
+  "existing_source": "Layihə komandasının bəyan etdiyi göstərici (67.8 km). Xam GIS geometriyası ilə təsdiqlənməyib — bax lane-recalculation.json.",
+  "planned_source": "public/processed/connections.csv · seçilmiş 9 dəhliz/küçə (selected_km = 11.39 km, 11.4 km-ə yuvarlanıb).",
+  "verification_tolerance_km": 0.1,
+  "updated_at": "2026-10-18T00:00:00.000Z"
+}

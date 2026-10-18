@@ -1,19 +1,6 @@
-import { useEffect, useState } from 'react'
-import { booleanValue, numberValue, parseCsv } from '../lib/csv'
-
-const DATA_ROOT = '/processed'
-
-async function readJson(path) {
-  const response = await fetch(`${DATA_ROOT}/${path}`)
-  if (!response.ok) throw new Error(`${path} yüklənmədi`)
-  return response.json()
-}
-
-async function readCsv(path) {
-  const response = await fetch(`${DATA_ROOT}/${path}`)
-  if (!response.ok) throw new Error(`${path} yüklənmədi`)
-  return parseCsv(await response.text())
-}
+import { useMemo } from 'react'
+import { booleanValue, numberValue } from '../lib/csv'
+import { useLiveDashboard } from './useLiveDashboard'
 
 function normalizeConnections(rows) {
   return rows.map((row) => ({
@@ -51,27 +38,13 @@ function normalizeFinance(rows) {
   }))
 }
 
+// Mövcud bölmələr üçün cədvəllər — indi /api/dataset-dən gəlir və real-time yenilənir.
 export function useDashboardData() {
-  const [state, setState] = useState({ data: null, loading: true, error: '' })
-
-  useEffect(() => {
-    let cancelled = false
-    Promise.all([
-      readJson('summary.json'),
-      readCsv('connections.csv'),
-      readCsv('hubs.csv'),
-      readCsv('finance.csv')
-    ]).then(([summary, connections, hubs, finance]) => {
-      if (!cancelled) setState({
-        data: { summary, connections: normalizeConnections(connections), hubs: normalizeHubs(hubs), finance: normalizeFinance(finance) },
-        loading: false,
-        error: ''
-      })
-    }).catch((error) => {
-      if (!cancelled) setState({ data: null, loading: false, error: error.message })
-    })
-    return () => { cancelled = true }
-  }, [])
-
-  return state
+  const { data: live, loading, error } = useLiveDashboard()
+  const data = useMemo(() => {
+    if (!live) return null
+    const { summary, connections, hubs, finance } = live.dataset
+    return { summary, connections: normalizeConnections(connections), hubs: normalizeHubs(hubs), finance: normalizeFinance(finance) }
+  }, [live])
+  return { data, loading, error: data ? '' : error }
 }

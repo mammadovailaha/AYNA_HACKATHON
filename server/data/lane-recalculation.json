@@ -1,0 +1,1334 @@
+{
+ "sources": {
+  "2025": "server/data/raw/mpv-v-mps.-son.kmz",
+  "2026": "server/data/raw/movcud-zolaqlar-velo.kmz",
+  "processed": "server/data/lanes-existing.geojson"
+ },
+ "crs": {
+  "input": "EPSG:4326 (KML standartı, WGS84)",
+  "metric": "EPSG:32639 (UTM 39N) və WGS84 geodezik"
+ },
+ "counts": {
+  "raw_lines": 106,
+  "by_version": {
+   "2025": 45,
+   "2026": 61
+  },
+  "duplicates_removed": 37,
+  "unique_segments": 69,
+  "processed_segments": 67,
+  "unique_missing_from_processed": 2,
+  "processed_not_in_raw": 0
+ },
+ "scenarios_km": {
+  "A_2025_raw_sum": 44.247,
+  "B_2026_raw_sum": 57.154,
+  "C_2025_plus_2026_raw_sum": 101.402,
+  "D_unique_segments_sum": 64.164,
+  "E_dissolved_union_2025": 44.247,
+  "F_dissolved_union_2026": 57.154,
+  "G_dissolved_union_all": 62.606,
+  "H_processed_67_segments": 64.164,
+  "I_processed_dissolved": 62.222,
+  "J_2026_minus_internal_double_drawn": 56.807
+ },
+ "version_breakdown": {
+  "in_both_2025_2026": {
+   "segments": 37,
+   "km": 37.235
+  },
+  "only_2025": {
+   "segments": 7,
+   "km": 7.009,
+   "overlap_with_2026": [
+    {
+     "uid": "2025-006",
+     "name": "Mətbuat pr.",
+     "km": 0.718,
+     "share_within_15m_of_2026": 1.0
+    },
+    {
+     "uid": "2025-009",
+     "name": "Hüseyn Cavid pr.",
+     "km": 1.494,
+     "share_within_15m_of_2026": 1.0
+    },
+    {
+     "uid": "2025-012",
+     "name": "Mikayıl Müşviq küç.",
+     "km": 0.743,
+     "share_within_15m_of_2026": 0.956
+    },
+    {
+     "uid": "2025-013",
+     "name": "Bülbül pr.",
+     "km": 0.823,
+     "share_within_15m_of_2026": 1.0
+    },
+    {
+     "uid": "2025-015",
+     "name": "Abdulla Şaiq küçəsi",
+     "km": 0.794,
+     "share_within_15m_of_2026": 0.985
+    },
+    {
+     "uid": "2025-016",
+     "name": "28 may küç.",
+     "km": 1.935,
+     "share_within_15m_of_2026": 1.0
+    },
+    {
+     "uid": "2025-040",
+     "name": "Nəcəfqulu Rəfiyev küç.",
+     "km": 0.501,
+     "share_within_15m_of_2026": 1.0
+    }
+   ]
+  },
+  "only_2026": {
+   "segments": 23,
+   "km": 19.919,
+   "names": [
+    "Hüseyn Cavid pr.",
+    "Bülbül pr.",
+    "28 may küç.",
+    "Abdulla Şaiq küçəsi",
+    "Nəcəfqulu Rəfiyev küç.",
+    "Şıxəli Qurbanov küçəsi",
+    "Xaqani küçəsi",
+    "İnşaatçılar pr.",
+    "Mikayıl Müşviq küç.",
+    "Cəfər Cabbarlı küçəsi",
+    "Xətai pr.",
+    "Üzeyir H - Keykab S. - keçid",
+    "Əbdürrəhim bəy Haqverdiyev küçəsi",
+    "Kövkəb Xanım Səfərəliyeva küç.",
+    "Bulvar",
+    "Mətbuat pr.",
+    "Bulvar 2",
+    "Vaqif pr.",
+    "Keykab xanım Səfərəliyeva 2",
+    "Şəfayət Mehdiyev küç.",
+    "Rəşid Behbudov küç.",
+    "Fəzail Bayramov küç. - Yusif Səfərov küç.",
+    "Xan Şuşinski"
+   ]
+  }
+ },
+ "internal_2026_overlaps": [
+  {
+   "uid": "2026-048",
+   "name": "Mirzəağa Əliyev küç.",
+   "km": 1.502,
+   "overlap_km": 0.071,
+   "share": 0.047
+  },
+  {
+   "uid": "2026-055",
+   "name": "Bülbül pr.",
+   "km": 0.832,
+   "overlap_km": 0.066,
+   "share": 0.08
+  },
+  {
+   "uid": "2026-057",
+   "name": "28 may küç.",
+   "km": 1.936,
+   "overlap_km": 0.069,
+   "share": 0.036
+  },
+  {
+   "uid": "2026-061",
+   "name": "Fikrət Əmirov küç.",
+   "km": 0.448,
+   "overlap_km": 0.067,
+   "share": 0.15
+  },
+  {
+   "uid": "2026-062",
+   "name": "Kövkəb Xanım Səfərəliyeva küç.",
+   "km": 0.381,
+   "overlap_km": 0.058,
+   "share": 0.152
+  },
+  {
+   "uid": "2026-065",
+   "name": "Akademik Zərifə Əliyeva küç.",
+   "km": 0.513,
+   "overlap_km": 0.154,
+   "share": 0.3
+  },
+  {
+   "uid": "2026-081",
+   "name": "Neftçilər pr-Bulvar",
+   "km": 2.263,
+   "overlap_km": 0.055,
+   "share": 0.024
+  },
+  {
+   "uid": "2026-086",
+   "name": "Aleksandr Puşkin küç.",
+   "km": 0.305,
+   "overlap_km": 0.154,
+   "share": 0.505
+  }
+ ],
+ "verification": {
+  "declared_km": 67.8,
+  "measured_km": 57.154,
+  "difference_km": 10.646,
+  "difference_pct": 18.63,
+  "tolerance_km": 0.1,
+  "status": "not_verified",
+  "closest_scenario": {
+   "name": "D_unique_segments_sum",
+   "km": 64.164
+  },
+  "method": "WGS84 geodezik uzunluq (pyproj.Geod) · kanonik şəbəkə: VELO YOL 2026 KMZ (2025 xətlərinin hamısını əhatə edir)",
+  "previous_pipeline_km": 64.164,
+  "previous_pipeline_overcount_km": 7.009,
+  "internal_double_drawn_km": 0.347
+ },
+ "methods_km": {
+  "canonical_2026": {
+   "geodesic_wgs84_km": 57.154,
+   "utm39n_planar_km": 57.138,
+   "haversine_km": 57.102
+  },
+  "unique_segments": {
+   "geodesic_wgs84_km": 64.164,
+   "utm39n_planar_km": 64.145,
+   "haversine_km": 64.112
+  },
+  "all_raw": {
+   "geodesic_wgs84_km": 101.402,
+   "utm39n_planar_km": 101.373,
+   "haversine_km": 101.299
+  }
+ },
+ "missing_from_processed": [
+  {
+   "uid": "2026-080",
+   "name": "8 Noyabr pr.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "km": 0.0,
+   "issues": [
+    "tək nöqtəli xətt"
+   ]
+  },
+  {
+   "uid": "2025-038",
+   "name": "8 Noyabr pr.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "km": 0.0,
+   "issues": [
+    "tək nöqtəli xətt"
+   ]
+  }
+ ],
+ "missing_geometry_km": 0.0,
+ "qa_issues": {
+  "öz-özünü kəsən xətt": 2,
+  "tək nöqtəli xətt": 2,
+  "şübhəli sıçrayış": 1
+ },
+ "qa_by_line": [
+  {
+   "uid": "2025-029",
+   "name": "Yusif Səfərov küç.",
+   "issues": [
+    "öz-özünü kəsən xətt"
+   ]
+  },
+  {
+   "uid": "2025-038",
+   "name": "8 Noyabr pr.",
+   "issues": [
+    "tək nöqtəli xətt"
+   ]
+  },
+  {
+   "uid": "2026-068",
+   "name": "Yusif Səfərov küç.",
+   "issues": [
+    "öz-özünü kəsən xətt"
+   ]
+  },
+  {
+   "uid": "2026-080",
+   "name": "8 Noyabr pr.",
+   "issues": [
+    "tək nöqtəli xətt"
+   ]
+  },
+  {
+   "uid": "2026-098",
+   "name": "Mətbuat pr.",
+   "issues": [
+    "şübhəli sıçrayış (>1.5 km ardıcıl nöqtələr arası)"
+   ]
+  }
+ ],
+ "segments": [
+  {
+   "uid": "2025-000",
+   "version": "2025",
+   "name": "Əziz Əliyev küç.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 13,
+   "geodesic_km": 0.4944,
+   "utm_km": 0.4943,
+   "duplicate_of": "2026-095"
+  },
+  {
+   "uid": "2025-001",
+   "version": "2025",
+   "name": "İstiqlaliyyət küç.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 5,
+   "geodesic_km": 0.4501,
+   "utm_km": 0.45,
+   "duplicate_of": "2026-046"
+  },
+  {
+   "uid": "2025-002",
+   "version": "2025",
+   "name": "Filarmoniya bağı.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 11,
+   "geodesic_km": 0.6197,
+   "utm_km": 0.6195,
+   "duplicate_of": "2026-045"
+  },
+  {
+   "uid": "2025-003",
+   "version": "2025",
+   "name": "Azərbaycan pr.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 4,
+   "geodesic_km": 0.6855,
+   "utm_km": 0.6853,
+   "duplicate_of": "2026-047"
+  },
+  {
+   "uid": "2025-004",
+   "version": "2025",
+   "name": "Mirzəağa Əliyev küç.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 8,
+   "geodesic_km": 1.5019,
+   "utm_km": 1.5015,
+   "duplicate_of": "2026-048"
+  },
+  {
+   "uid": "2025-005",
+   "version": "2025",
+   "name": "Şəmsi Bədəlbəyli küç.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 12,
+   "geodesic_km": 0.3698,
+   "utm_km": 0.3697,
+   "duplicate_of": "2026-050"
+  },
+  {
+   "uid": "2025-006",
+   "version": "2025",
+   "name": "Mətbuat pr.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 3,
+   "geodesic_km": 0.7184,
+   "utm_km": 0.7182,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2025-007",
+   "version": "2025",
+   "name": "Bəxtiyar Vahabzadə küç.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 2,
+   "geodesic_km": 0.5072,
+   "utm_km": 0.5071,
+   "duplicate_of": "2026-049"
+  },
+  {
+   "uid": "2025-008",
+   "version": "2025",
+   "name": "Məmməd Rahim küç.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 2,
+   "geodesic_km": 0.512,
+   "utm_km": 0.5118,
+   "duplicate_of": "2026-051"
+  },
+  {
+   "uid": "2025-009",
+   "version": "2025",
+   "name": "Hüseyn Cavid pr.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 4,
+   "geodesic_km": 1.4942,
+   "utm_km": 1.4938,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2025-010",
+   "version": "2025",
+   "name": "Hüseyn Cavid pr.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 7,
+   "geodesic_km": 0.8403,
+   "utm_km": 0.8401,
+   "duplicate_of": "2026-052"
+  },
+  {
+   "uid": "2025-011",
+   "version": "2025",
+   "name": "Parlament pr.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 6,
+   "geodesic_km": 0.9362,
+   "utm_km": 0.936,
+   "duplicate_of": "2026-053"
+  },
+  {
+   "uid": "2025-012",
+   "version": "2025",
+   "name": "Mikayıl Müşviq küç.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 16,
+   "geodesic_km": 0.7427,
+   "utm_km": 0.7425,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2025-013",
+   "version": "2025",
+   "name": "Bülbül pr.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 17,
+   "geodesic_km": 0.8234,
+   "utm_km": 0.8231,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2025-014",
+   "version": "2025",
+   "name": "Azadlıq pr.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 6,
+   "geodesic_km": 0.2954,
+   "utm_km": 0.2953,
+   "duplicate_of": "2026-056"
+  },
+  {
+   "uid": "2025-015",
+   "version": "2025",
+   "name": "Abdulla Şaiq küçəsi",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 26,
+   "geodesic_km": 0.7943,
+   "utm_km": 0.794,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2025-016",
+   "version": "2025",
+   "name": "28 may küç.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 11,
+   "geodesic_km": 1.9349,
+   "utm_km": 1.9344,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2025-017",
+   "version": "2025",
+   "name": "28 may HUB",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 4,
+   "geodesic_km": 0.2253,
+   "utm_km": 0.2252,
+   "duplicate_of": "2026-058"
+  },
+  {
+   "uid": "2025-018",
+   "version": "2025",
+   "name": "28 may HUB",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 5,
+   "geodesic_km": 0.2241,
+   "utm_km": 0.224,
+   "duplicate_of": "2026-083"
+  },
+  {
+   "uid": "2025-019",
+   "version": "2025",
+   "name": "Kövkəb Xanım Səfərəliyeva küç.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 3,
+   "geodesic_km": 0.3838,
+   "utm_km": 0.3836,
+   "duplicate_of": "2026-062"
+  },
+  {
+   "uid": "2025-020",
+   "version": "2025",
+   "name": "Dilarə Əliyeva küç.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 7,
+   "geodesic_km": 0.5336,
+   "utm_km": 0.5334,
+   "duplicate_of": "2026-060"
+  },
+  {
+   "uid": "2025-021",
+   "version": "2025",
+   "name": "Fikrət Əmirov küç.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 8,
+   "geodesic_km": 0.4484,
+   "utm_km": 0.4483,
+   "duplicate_of": "2026-061"
+  },
+  {
+   "uid": "2025-022",
+   "version": "2025",
+   "name": "Sahil bağı",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 4,
+   "geodesic_km": 0.5528,
+   "utm_km": 0.5527,
+   "duplicate_of": "2026-063"
+  },
+  {
+   "uid": "2025-023",
+   "version": "2025",
+   "name": "Üzeyir Hacıbəyli küç.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 9,
+   "geodesic_km": 0.7485,
+   "utm_km": 0.7483,
+   "duplicate_of": "2026-064"
+  },
+  {
+   "uid": "2025-024",
+   "version": "2025",
+   "name": "Üzeyir Hacıbəyli küç.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 4,
+   "geodesic_km": 0.3682,
+   "utm_km": 0.3681,
+   "duplicate_of": "2026-069"
+  },
+  {
+   "uid": "2025-025",
+   "version": "2025",
+   "name": "Akademik Zərifə Əliyeva küç.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 8,
+   "geodesic_km": 0.5132,
+   "utm_km": 0.513,
+   "duplicate_of": "2026-065"
+  },
+  {
+   "uid": "2025-026",
+   "version": "2025",
+   "name": "Aleksandr Puşkin küç.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 5,
+   "geodesic_km": 0.3046,
+   "utm_km": 0.3045,
+   "duplicate_of": "2026-086"
+  },
+  {
+   "uid": "2025-027",
+   "version": "2025",
+   "name": "Nizami küç.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 4,
+   "geodesic_km": 1.0679,
+   "utm_km": 1.0676,
+   "duplicate_of": "2026-066"
+  },
+  {
+   "uid": "2025-028",
+   "version": "2025",
+   "name": "Xəqani küç.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 6,
+   "geodesic_km": 0.4342,
+   "utm_km": 0.4341,
+   "duplicate_of": "2026-067"
+  },
+  {
+   "uid": "2025-029",
+   "version": "2025",
+   "name": "Yusif Səfərov küç.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 10,
+   "geodesic_km": 0.8899,
+   "utm_km": 0.8897,
+   "duplicate_of": "2026-068"
+  },
+  {
+   "uid": "2025-030",
+   "version": "2025",
+   "name": "Həmid Abbasbəyli küç.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 3,
+   "geodesic_km": 0.2595,
+   "utm_km": 0.2594,
+   "duplicate_of": "2026-070"
+  },
+  {
+   "uid": "2025-031",
+   "version": "2025",
+   "name": "Fəzail Bayramov küç.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 11,
+   "geodesic_km": 0.4744,
+   "utm_km": 0.4742,
+   "duplicate_of": "2026-076"
+  },
+  {
+   "uid": "2025-032",
+   "version": "2025",
+   "name": "Xocalı pr.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 14,
+   "geodesic_km": 1.1417,
+   "utm_km": 1.1413,
+   "duplicate_of": "2026-084"
+  },
+  {
+   "uid": "2025-033",
+   "version": "2025",
+   "name": "İzzət Orucova küç.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 14,
+   "geodesic_km": 0.4645,
+   "utm_km": 0.4644,
+   "duplicate_of": "2026-071"
+  },
+  {
+   "uid": "2025-034",
+   "version": "2025",
+   "name": "Xəqani Rüstəmov küç.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 4,
+   "geodesic_km": 0.302,
+   "utm_km": 0.3019,
+   "duplicate_of": "2026-072"
+  },
+  {
+   "uid": "2025-035",
+   "version": "2025",
+   "name": "Xəqani Rüstəmov küç.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 3,
+   "geodesic_km": 0.2878,
+   "utm_km": 0.2877,
+   "duplicate_of": "2026-074"
+  },
+  {
+   "uid": "2025-036",
+   "version": "2025",
+   "name": "8 Noyabr pr.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 42,
+   "geodesic_km": 7.6097,
+   "utm_km": 7.6074,
+   "duplicate_of": "2026-073"
+  },
+  {
+   "uid": "2025-037",
+   "version": "2025",
+   "name": "8 Noyabr pr.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 30,
+   "geodesic_km": 6.2507,
+   "utm_km": 6.2489,
+   "duplicate_of": "2026-075"
+  },
+  {
+   "uid": "2025-038",
+   "version": "2025",
+   "name": "8 Noyabr pr.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 0,
+   "geodesic_km": 0.0,
+   "utm_km": 0.0,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2025-039",
+   "version": "2025",
+   "name": "Afiyəddin Cəlilov küç.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 18,
+   "geodesic_km": 1.4003,
+   "utm_km": 1.3999,
+   "duplicate_of": "2026-078"
+  },
+  {
+   "uid": "2025-040",
+   "version": "2025",
+   "name": "Nəcəfqulu Rəfiyev küç.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 2,
+   "geodesic_km": 0.5013,
+   "utm_km": 0.5012,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2025-041",
+   "version": "2025",
+   "name": "Ağ şəhər ərazisi.",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 11,
+   "geodesic_km": 0.3002,
+   "utm_km": 0.3001,
+   "duplicate_of": "2026-077"
+  },
+  {
+   "uid": "2025-042",
+   "version": "2025",
+   "name": "Neftçilər pr-Bulvar",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 14,
+   "geodesic_km": 2.2632,
+   "utm_km": 2.2626,
+   "duplicate_of": "2026-081"
+  },
+  {
+   "uid": "2025-043",
+   "version": "2025",
+   "name": "Crescent mall ərazisi",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 28,
+   "geodesic_km": 1.0139,
+   "utm_km": 1.0136,
+   "duplicate_of": "2026-082"
+  },
+  {
+   "uid": "2025-044",
+   "version": "2025",
+   "name": "Ağ şəhər bulvarı ərazisi",
+   "folder": "Temporary Places / Temporary Places / velosiped məntəqələri.11 sentyabr.kmz / Velosiped yolları 2025. avqust. son.kmz / Velosiped yolları 2025 yanvar",
+   "points": 10,
+   "geodesic_km": 1.5634,
+   "utm_km": 1.563,
+   "duplicate_of": "2026-085"
+  },
+  {
+   "uid": "2026-045",
+   "version": "2026",
+   "name": "Filarmoniya bağı.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 11,
+   "geodesic_km": 0.6197,
+   "utm_km": 0.6195,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-046",
+   "version": "2026",
+   "name": "İstiqlaliyyət küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 5,
+   "geodesic_km": 0.4501,
+   "utm_km": 0.45,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-047",
+   "version": "2026",
+   "name": "Azərbaycan pr.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 4,
+   "geodesic_km": 0.6855,
+   "utm_km": 0.6853,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-048",
+   "version": "2026",
+   "name": "Mirzəağa Əliyev küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 8,
+   "geodesic_km": 1.5019,
+   "utm_km": 1.5015,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-049",
+   "version": "2026",
+   "name": "Bəxtiyar Vahabzadə küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 2,
+   "geodesic_km": 0.5072,
+   "utm_km": 0.5071,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-050",
+   "version": "2026",
+   "name": "Şəmsi Bədəlbəyli küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 12,
+   "geodesic_km": 0.3698,
+   "utm_km": 0.3697,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-051",
+   "version": "2026",
+   "name": "Məmməd Rahim küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 2,
+   "geodesic_km": 0.512,
+   "utm_km": 0.5118,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-052",
+   "version": "2026",
+   "name": "Hüseyn Cavid pr.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 7,
+   "geodesic_km": 0.8403,
+   "utm_km": 0.8401,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-053",
+   "version": "2026",
+   "name": "Parlament pr.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 6,
+   "geodesic_km": 0.9362,
+   "utm_km": 0.936,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-054",
+   "version": "2026",
+   "name": "Hüseyn Cavid pr.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 2,
+   "geodesic_km": 0.9979,
+   "utm_km": 0.9976,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-055",
+   "version": "2026",
+   "name": "Bülbül pr.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 14,
+   "geodesic_km": 0.8321,
+   "utm_km": 0.8319,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-056",
+   "version": "2026",
+   "name": "Azadlıq pr.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 6,
+   "geodesic_km": 0.2954,
+   "utm_km": 0.2953,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-057",
+   "version": "2026",
+   "name": "28 may küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 11,
+   "geodesic_km": 1.936,
+   "utm_km": 1.9354,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-058",
+   "version": "2026",
+   "name": "28 may HUB",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 4,
+   "geodesic_km": 0.2253,
+   "utm_km": 0.2252,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-059",
+   "version": "2026",
+   "name": "Abdulla Şaiq küçəsi",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 25,
+   "geodesic_km": 0.7673,
+   "utm_km": 0.7671,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-060",
+   "version": "2026",
+   "name": "Dilarə Əliyeva küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 7,
+   "geodesic_km": 0.5336,
+   "utm_km": 0.5334,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-061",
+   "version": "2026",
+   "name": "Fikrət Əmirov küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 8,
+   "geodesic_km": 0.4484,
+   "utm_km": 0.4483,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-062",
+   "version": "2026",
+   "name": "Kövkəb Xanım Səfərəliyeva küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 3,
+   "geodesic_km": 0.3807,
+   "utm_km": 0.3806,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-063",
+   "version": "2026",
+   "name": "Sahil bağı",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 4,
+   "geodesic_km": 0.5528,
+   "utm_km": 0.5527,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-064",
+   "version": "2026",
+   "name": "Üzeyir Hacıbəyli küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 9,
+   "geodesic_km": 0.7485,
+   "utm_km": 0.7483,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-065",
+   "version": "2026",
+   "name": "Akademik Zərifə Əliyeva küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 8,
+   "geodesic_km": 0.5132,
+   "utm_km": 0.513,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-066",
+   "version": "2026",
+   "name": "Nizami küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 4,
+   "geodesic_km": 1.0679,
+   "utm_km": 1.0676,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-067",
+   "version": "2026",
+   "name": "Xəqani küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 6,
+   "geodesic_km": 0.4342,
+   "utm_km": 0.4341,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-068",
+   "version": "2026",
+   "name": "Yusif Səfərov küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 10,
+   "geodesic_km": 0.8899,
+   "utm_km": 0.8897,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-069",
+   "version": "2026",
+   "name": "Üzeyir Hacıbəyli küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 4,
+   "geodesic_km": 0.3682,
+   "utm_km": 0.3681,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-070",
+   "version": "2026",
+   "name": "Həmid Abbasbəyli küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 3,
+   "geodesic_km": 0.2595,
+   "utm_km": 0.2594,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-071",
+   "version": "2026",
+   "name": "İzzət Orucova küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 14,
+   "geodesic_km": 0.4645,
+   "utm_km": 0.4644,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-072",
+   "version": "2026",
+   "name": "Xəqani Rüstəmov küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 4,
+   "geodesic_km": 0.302,
+   "utm_km": 0.3019,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-073",
+   "version": "2026",
+   "name": "8 Noyabr pr.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 42,
+   "geodesic_km": 7.6097,
+   "utm_km": 7.6074,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-074",
+   "version": "2026",
+   "name": "Xəqani Rüstəmov küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 3,
+   "geodesic_km": 0.2878,
+   "utm_km": 0.2877,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-075",
+   "version": "2026",
+   "name": "8 Noyabr pr.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 30,
+   "geodesic_km": 6.2507,
+   "utm_km": 6.2489,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-076",
+   "version": "2026",
+   "name": "Fəzail Bayramov küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 11,
+   "geodesic_km": 0.4744,
+   "utm_km": 0.4742,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-077",
+   "version": "2026",
+   "name": "Ağ şəhər ərazisi.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 11,
+   "geodesic_km": 0.3002,
+   "utm_km": 0.3001,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-078",
+   "version": "2026",
+   "name": "Afiyəddin Cəlilov küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 18,
+   "geodesic_km": 1.4003,
+   "utm_km": 1.3999,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-079",
+   "version": "2026",
+   "name": "Nəcəfqulu Rəfiyev küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 3,
+   "geodesic_km": 0.5024,
+   "utm_km": 0.5022,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-080",
+   "version": "2026",
+   "name": "8 Noyabr pr.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 0,
+   "geodesic_km": 0.0,
+   "utm_km": 0.0,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-081",
+   "version": "2026",
+   "name": "Neftçilər pr-Bulvar",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 14,
+   "geodesic_km": 2.2632,
+   "utm_km": 2.2626,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-082",
+   "version": "2026",
+   "name": "Crescent mall ərazisi",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 28,
+   "geodesic_km": 1.0139,
+   "utm_km": 1.0136,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-083",
+   "version": "2026",
+   "name": "28 may HUB",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 5,
+   "geodesic_km": 0.2241,
+   "utm_km": 0.224,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-084",
+   "version": "2026",
+   "name": "Xocalı pr.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 14,
+   "geodesic_km": 1.1417,
+   "utm_km": 1.1413,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-085",
+   "version": "2026",
+   "name": "Ağ şəhər bulvarı ərazisi",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 10,
+   "geodesic_km": 1.5634,
+   "utm_km": 1.563,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-086",
+   "version": "2026",
+   "name": "Aleksandr Puşkin küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 5,
+   "geodesic_km": 0.3046,
+   "utm_km": 0.3045,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-087",
+   "version": "2026",
+   "name": "Şıxəli Qurbanov küçəsi",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 3,
+   "geodesic_km": 0.4582,
+   "utm_km": 0.4581,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-088",
+   "version": "2026",
+   "name": "Xaqani küçəsi",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 2,
+   "geodesic_km": 0.6115,
+   "utm_km": 0.6114,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-089",
+   "version": "2026",
+   "name": "İnşaatçılar pr.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 3,
+   "geodesic_km": 0.8018,
+   "utm_km": 0.8015,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-090",
+   "version": "2026",
+   "name": "Mikayıl Müşviq küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 15,
+   "geodesic_km": 0.7305,
+   "utm_km": 0.7303,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-091",
+   "version": "2026",
+   "name": "Cəfər Cabbarlı küçəsi",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 4,
+   "geodesic_km": 1.1874,
+   "utm_km": 1.187,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-092",
+   "version": "2026",
+   "name": "Xətai pr.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 15,
+   "geodesic_km": 2.0157,
+   "utm_km": 2.0152,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-093",
+   "version": "2026",
+   "name": "Üzeyir H - Keykab S. - keçid",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 3,
+   "geodesic_km": 0.0238,
+   "utm_km": 0.0238,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-094",
+   "version": "2026",
+   "name": "Əbdürrəhim bəy Haqverdiyev küçəsi",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 15,
+   "geodesic_km": 0.5611,
+   "utm_km": 0.561,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-095",
+   "version": "2026",
+   "name": "Əziz Əliyev küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 13,
+   "geodesic_km": 0.4944,
+   "utm_km": 0.4943,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-096",
+   "version": "2026",
+   "name": "Kövkəb Xanım Səfərəliyeva küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 2,
+   "geodesic_km": 0.0895,
+   "utm_km": 0.0894,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-097",
+   "version": "2026",
+   "name": "Bulvar",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 26,
+   "geodesic_km": 0.65,
+   "utm_km": 0.6498,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-098",
+   "version": "2026",
+   "name": "Mətbuat pr.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 2,
+   "geodesic_km": 1.908,
+   "utm_km": 1.9074,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-099",
+   "version": "2026",
+   "name": "Bulvar 2",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 51,
+   "geodesic_km": 1.6289,
+   "utm_km": 1.6284,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-100",
+   "version": "2026",
+   "name": "Vaqif pr.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 2,
+   "geodesic_km": 0.8212,
+   "utm_km": 0.821,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-101",
+   "version": "2026",
+   "name": "Keykab xanım Səfərəliyeva 2",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 5,
+   "geodesic_km": 0.1019,
+   "utm_km": 0.1019,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-102",
+   "version": "2026",
+   "name": "Şəfayət Mehdiyev küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 2,
+   "geodesic_km": 0.6238,
+   "utm_km": 0.6237,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-103",
+   "version": "2026",
+   "name": "Rəşid Behbudov küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 5,
+   "geodesic_km": 1.6278,
+   "utm_km": 1.6273,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-104",
+   "version": "2026",
+   "name": "Fəzail Bayramov küç. - Yusif Səfərov küç.",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 7,
+   "geodesic_km": 0.8305,
+   "utm_km": 0.8302,
+   "duplicate_of": null
+  },
+  {
+   "uid": "2026-105",
+   "version": "2026",
+   "name": "Xan Şuşinski",
+   "folder": "VELO YOL 2026 (1).kmz / VELO YOL 2026 / Mövcud zolaqlar",
+   "points": 3,
+   "geodesic_km": 0.212,
+   "utm_km": 0.2119,
+   "duplicate_of": null
+  }
+ ]
+}

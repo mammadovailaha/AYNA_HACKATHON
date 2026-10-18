@@ -1,8 +1,13 @@
-import React, { useMemo, useRef, useState } from 'react'
+import React, { lazy, Suspense, useMemo, useState } from 'react'
 import Icon from './components/Icon'
 import { AreaChart, Bars, DonutChart } from './components/Charts'
 import { EmptyState, MetricCard, Panel, PanelHeader, SectionHeader, StatusBadge } from './components/Ui'
 import { useDashboardData } from './hooks/useDashboardData'
+import { useLiveDashboard } from './hooks/useLiveDashboard'
+// MapLibre böyük kitabxanadır — yalnız xəritə bölməsi açılanda yüklənir
+const GisMap = lazy(() => import('./components/GisMap'))
+import HubDetails from './components/HubDetails'
+import { ComparisonTable, InfrastructureCards, InfrastructureGrowthChart, LaneRecalculation, RealtimeStatus, VerificationBadge } from './components/Infrastructure'
 
 const navItems = [
   { id: 'overview', label: 'Vahid mərkəz', icon: 'grid' },
@@ -43,7 +48,7 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   if (loading) return <div className="loading-screen"><div className="loading-mark">AXIN</div><div className="loader" /><p>Dashboard məlumatları hazırlanır…</p></div>
-  if (error || !data) return <div className="loading-screen error-screen"><div className="loading-mark">AXIN</div><h2>Data yüklənmədi</h2><p>{error || 'Naməlum xəta'}</p><small>Frontend-i `frontend` qovluğundan Vite ilə işə saldığınıza əmin olun.</small></div>
+  if (error || !data) return <div className="loading-screen error-screen"><div className="loading-mark">AXIN</div><h2>Data yüklənmədi</h2><p>{error || 'Naməlum xəta'}</p><small>API serverinin işlədiyinə əmin olun (npm run dev və ya npm start).</small></div>
 
   const { summary, connections, hubs, finance } = data
   const viewTitle = navItems.find((item) => item.id === activeView)?.label ?? 'Ümumi baxış'
@@ -58,14 +63,14 @@ function App() {
       <div className="brand"><div className="brand-mark">A</div><div className="brand-copy"><strong>AXIN</strong><span>Mobility hub intelligence</span></div><button className="sidebar-toggle" onClick={() => setSidebarCollapsed((value) => !value)} aria-label={sidebarCollapsed ? 'Sidebarı aç' : 'Sidebarı bağla'} title={sidebarCollapsed ? 'Sidebarı aç' : 'Sidebarı bağla'}><Icon name="chevron" size={17} /></button><button className="close-sidebar" onClick={() => setSidebarOpen(false)} aria-label="Menyunu bağla">×</button></div>
       <div className="workspace-switch"><span className="workspace-dot" /><div><small>VAHİD ŞƏBƏKƏ</small><b>Bakı multimodal sistemi</b></div><Icon name="chevron" size={15} /></div>
       <nav className="main-nav"><span className="nav-caption">İDARƏETMƏ</span>{navItems.map((item) => <button key={item.id} className={activeView === item.id ? 'active' : ''} data-tooltip={item.label} aria-label={item.label} onClick={() => handleNavClick(item.id)}><Icon name={item.icon} size={18} /><span>{item.label}</span>{item.id === 'connections' && <em>{connections.filter((row) => row.selected).length}</em>}</button>)}</nav>
-      <div className="sidebar-bottom"><div className="status-card" data-tooltip="Vahid data qatı"><span className="live-dot" /><div><b>Vahid data qatı</b><small>17 oktyabr 2026</small></div></div><div className="user-card" data-tooltip="AYNA qərar mərkəzi"><div className="avatar">AY</div><div><b>AYNA qərar mərkəzi</b><small>İdarəetmə paneli</small></div><Icon name="user" size={20} /></div></div>
+      <div className="sidebar-bottom"><div className="status-card" data-tooltip="Real-time data qatı"><RealtimeStatus compact /></div><div className="user-card" data-tooltip="AYNA qərar mərkəzi"><div className="avatar">AY</div><div><b>AYNA qərar mərkəzi</b><small>İdarəetmə paneli</small></div><Icon name="user" size={20} /></div></div>
     </aside>
     {sidebarOpen && <button className="sidebar-backdrop" aria-label="Menyunu bağla" onClick={() => setSidebarOpen(false)} />}
     <main className="main-content">
-      <header className="topbar"><button className="mobile-menu" onClick={() => setSidebarOpen(true)}><Icon name="grid" size={20} /></button><div className="breadcrumb"><span>AXIN /</span><b>{viewTitle}</b></div><div className="top-actions"><div className="top-search"><Icon name="search" size={16} /><span>Dashboardda axtar…</span><kbd>⌘ K</kbd></div><div className="top-avatar">AY</div></div></header>
+      <header className="topbar"><button className="mobile-menu" onClick={() => setSidebarOpen(true)}><Icon name="grid" size={20} /></button><div className="breadcrumb"><span>AXIN /</span><b>{viewTitle}</b></div><div className="top-actions"><RealtimeStatus compact /><div className="top-search"><Icon name="search" size={16} /><span>Dashboardda axtar…</span><kbd>⌘ K</kbd></div><div className="top-avatar">AY</div></div></header>
       <div className="content-wrap">
         {activeView === 'overview' && <Overview summary={summary} connections={connections} hubs={hubs} finance={finance} />}
-        {activeView === 'map' && <MapView summary={summary} />}
+        {activeView === 'map' && <MapView />}
         {activeView === 'before-after' && <BeforeAfterView summary={summary} />}
         {activeView === 'connections' && <ConnectionsView connections={connections} />}
         {activeView === 'hubs' && <HubsView hubs={hubs} />}
@@ -76,6 +81,8 @@ function App() {
 }
 
 function Overview({ summary, connections, hubs, finance }) {
+  const live = useLiveDashboard().data
+  const infra = live.summary.infrastructure
   const phases = summary.phases
   const current = phases['İNDİ']
   const future = phases['GƏLƏCƏK']
@@ -85,8 +92,10 @@ function Overview({ summary, connections, hubs, finance }) {
   const financeTop = finance.slice().sort((a, b) => b['cəmi_azn'] - a['cəmi_azn']).slice(0, 5).map((row) => ({ label: row['maddə'], value: row['cəmi_azn'] }))
   const coverageChange = ((future.coverage_pct - current.coverage_pct) / current.coverage_pct * 100).toFixed(1)
   const reportRows = [
-    { göstərici: 'Mövcud velo zolağı', dəyər: `${fmt(current.lanes_km, 1)} km`, qeyd: 'İndiki vəziyyət' },
-    { göstərici: 'Gələcək velo zolağı', dəyər: `${fmt(future.lanes_km, 1)} km`, qeyd: 'İnkişaf ssenarisi' },
+    { göstərici: 'Mövcud velosiped infrastrukturu', dəyər: `${fmt(infra.existing_km, 1)} km`, qeyd: 'Tikilib' },
+    { göstərici: 'Yeni əlavə ediləcək hissə', dəyər: `+${fmt(infra.planned_addition_km, 1)} km`, qeyd: 'Planlaşdırılır' },
+    { göstərici: 'Planlaşdırılan ümumi uzunluq', dəyər: `${fmt(infra.projected_total_km, 1)} km`, qeyd: 'Proqnoz' },
+    { göstərici: 'İnfrastruktur artımı', dəyər: `${fmt(infra.growth_pct, 2)}%`, qeyd: 'Hesablanmış' },
     { göstərici: 'Ümumi kapital xərci', dəyər: money(summary.capex_azn), qeyd: 'AZN' },
     { göstərici: 'Təxmini icra müddəti', dəyər: `${summary.months} ay`, qeyd: 'İnkişaf ssenarisi' },
     { göstərici: 'Yeni qoşulan məntəqə', dəyər: `+${summary.newly_connected}`, qeyd: 'Məntəqə' }
@@ -97,7 +106,7 @@ function Overview({ summary, connections, hubs, finance }) {
       <div className="hero-copy">
         <span className="eyebrow mint">{scenarioYear} · MOBILITY HUB SSENARİSİ</span>
         <h1>Son mili tamamla,<br /><em>şəbəkəni vahid sistemə çevir.</em></h1>
-        <p>AXIN avtobus və metro qovşaqlarını, velo zolaqlarını və mikromobillik məntəqələrini birləşdirərək mövcud {fmt(current.lanes_km, 1)} km şəbəkəni {fmt(future.lanes_km, 1)} km vahid last-mile sisteminə çevirir.</p>
+        <p>AXIN avtobus və metro qovşaqlarını, velo zolaqlarını və mikromobillik məntəqələrini birləşdirərək mövcud {fmt(infra.existing_km, 1)} km şəbəkəni +{fmt(infra.planned_addition_km, 1)} km planlaşdırılan bağlantı ilə {fmt(infra.projected_total_km, 1)} km vahid last-mile sisteminə çevirir.</p>
         <div className="system-flow" aria-label="Vahid multimodal şəbəkə"><span className="mode-chip"><Icon name="route" size={17} /> Avtobus</span><i>→</i><span className="mode-chip"><Icon name="pin" size={17} /> Mobility hub</span><i>→</i><span className="mode-chip"><Icon name="bike" size={17} /> Velosiped</span><i>→</i><span className="mode-chip"><Icon name="map" size={17} /> Last-mile</span></div>
         <div className="hero-meta">
           <div><b>{money(summary.capex_azn)}</b><span>ümumi kapital xərci</span></div>
@@ -109,44 +118,79 @@ function Overview({ summary, connections, hubs, finance }) {
         <div className="network-map" />
         <div className="network-orbit orbit-one" />
         <div className="network-orbit orbit-two" />
-        <div className="network-core"><Icon name="bike" size={34} /><strong>{fmt(future.lanes_km, 1)} km</strong><span>Ümumi velosiped zolağı</span></div>
+        <div className="network-core"><Icon name="bike" size={34} /><strong>{fmt(infra.projected_total_km, 1)} km</strong><span>Planlaşdırılan ümumi</span></div>
         <span className="node n1" /><span className="node n2" /><span className="node n3" /><span className="node n4" />
       </div>
     </div>
-    <div className="metric-grid"><MetricCard label="Velo şəbəkəsi" value={`${fmt(current.lanes_km, 1)} km`} change={`+${fmt(future.lanes_km - current.lanes_km, 1)} km`} changeLabel="vahid sistem sonrası" tone="purple" icon="route" /><MetricCard label="Multimodal əhatə" value={`${fmt(current.coverage_pct, 1)}%`} change={`+${fmt(future.coverage_pct - current.coverage_pct, 1)}%`} changeLabel={`ssenari · ${coverageChange}% artım`} tone="mint" icon="map" /><MetricCard label="Last-mile boşluğu" value={fmt(current.disconnected)} change={`-${fmt(current.disconnected - future.disconnected)}`} changeLabel="hub ssenarisi sonrası" tone="orange" icon="pin" /><MetricCard label="İcra və xidmət xərci" value={money(summary.maintenance_azn_year)} change="8 ay" changeLabel="vahid sistemin icrası" tone="blue" icon="wallet" /></div>
+    <div className="metric-grid"><MetricCard label="Velo şəbəkəsi" value={`${fmt(infra.existing_km, 1)} km`} change={`+${fmt(infra.planned_addition_km, 1)} km`} changeLabel={`planlaşdırılır · +${fmt(infra.growth_pct, 2)}%`} tone="purple" icon="route" /><MetricCard label="Multimodal əhatə" value={`${fmt(current.coverage_pct, 1)}%`} change={`+${fmt(future.coverage_pct - current.coverage_pct, 1)}%`} changeLabel={`ssenari · ${coverageChange}% artım`} tone="mint" icon="map" /><MetricCard label="Last-mile boşluğu" value={fmt(current.disconnected)} change={`-${fmt(current.disconnected - future.disconnected)}`} changeLabel="hub ssenarisi sonrası" tone="orange" icon="pin" /><MetricCard label="İcra və xidmət xərci" value={money(summary.maintenance_azn_year)} change="8 ay" changeLabel="vahid sistemin icrası" tone="blue" icon="wallet" /></div>
+    <SectionHeader eyebrow="VELOSİPED İNFRASTRUKTURU" title="Mövcud və planlaşdırılan şəbəkə" description="Mövcud yollar tikilib; əlavə hissə planlaşdırılır və hələ tikilməyib. Ümumi uzunluq və artım faizi API-də avtomatik hesablanır." />
+    <div className="infra-layout">
+      <InfrastructureCards infra={infra} />
+      <Panel className="growth-panel"><PanelHeader title="İnfrastruktur artımı" subtitle="BEFORE → ADDITION → PROJECTED TOTAL" action={<StatusBadge tone="mint">+{fmt(infra.growth_pct, 2)}%</StatusBadge>} /><InfrastructureGrowthChart infra={infra} /></Panel>
+      <Panel className="realtime-panel"><PanelHeader title="Real-time data statusu" subtitle="Server-Sent Events" /><RealtimeStatus /></Panel>
+      <Panel className="comparison-panel"><PanelHeader title="Mövcud vs planlaşdırılan" subtitle="Plan tətbiq olunduqdan sonrakı proqnoz" /><ComparisonTable comparison={live.comparison} /></Panel>
+    </div>
     <div className="dashboard-grid overview-grid"><Panel className="coverage-panel"><PanelHeader title="Vahid şəbəkə əhatəsi" subtitle="Avtobus · metro · velo · hub" action={<StatusBadge tone="mint">+{fmt(future.coverage_pct - current.coverage_pct, 1)} pp</StatusBadge>} /><AreaChart values={phaseKeys.map((key) => phases[key].coverage_pct)} labels={['2025', '2026', 'Ssenari']} /><div className="chart-footnote"><span><i className="legend-dot purple" />Zolaq və hub-a 300 m-də yaşayan sakin</span><b>{fmt(future.coverage_pop)} nəfər</b></div></Panel><Panel><PanelHeader title="Hub və bağlantı investisiyası" subtitle="Vahid sistem üzrə prioritetlər" /><DonutChart segments={financeTop.slice(0, 4)} centerValue={money(summary.capex_azn)} centerLabel="ümumi" /></Panel><Panel className="wide-panel"><PanelHeader title="Last-mile prioritetləri" subtitle={`${selectedConnections.length} bağlantı seçilib · fayda/xərc nisbətinə görə`} /><div className="priority-table"><div className="priority-head"><span>İSTİQAMƏT</span><span>UZUNLUQ</span><span>YENİ MƏNTƏQƏ</span><span>XƏRC</span><span>STATUS</span></div>{selectedConnections.slice(0, 5).map((row) => <div className="priority-row" key={row.id}><div><strong>{row.name}</strong><small>{row.from} → {row.to}</small></div><b>{fmt(row.length_km, 2)} km</b><b>{row.newly_connected}</b><b>{money(row.cost_azn)}</b><StatusBadge tone="mint">Seçildi</StatusBadge></div>)}</div></Panel><Panel className="wide-panel hub-panel"><PanelHeader title="Prioritet mobility hub-lar" subtitle="Avtobus, metro və mikromobillik inteqrasiya nöqtələri" /><div className="hub-list">{selectedHubs.slice(0, 4).map((hub) => <div className="hub-item" key={hub.name}><span className="hub-rank">0{hub.rank}</span><div className="hub-main"><strong>{hub.name}</strong><span><Icon name="route" size={13} /> {hub.n_lines} avtobus xətti <i /> <Icon name="pin" size={13} /> {hub.parkings} məntəqə</span></div><div className="hub-pop"><b>{fmt(hub.pop)}</b><span>500 m-də sakin</span></div><Icon name="chevron" size={16} className="muted-icon" /></div>)}</div></Panel></div>
   </>
 }
 
-function MapView({ summary }) {
-  const future = summary.phases['GƏLƏCƏK']
-  const mapFrame = useRef(null)
-  const [layers, setLayers] = useState({ existing: true, proposed: true, disconnected: true, hubs: true })
-  const layerDefinitions = [
-    { key: 'existing', label: 'Mövcud velo şəbəkəsi', marker: 'map-line existing' },
-    { key: 'proposed', label: 'Prioritet last-mile', marker: 'map-line proposed' },
-    { key: 'disconnected', label: 'Last-mile boşluğu', marker: 'map-dot disconnected' },
-    { key: 'hubs', label: 'Mobility hub', marker: 'map-dot hub' }
-  ]
-  const toggleLayer = (definition) => {
-    const nextVisible = !layers[definition.key]
-    mapFrame.current?.contentWindow?.postMessage({ type: 'axin-layer-toggle', layer: definition.key, visible: nextVisible }, '*')
-    setLayers((current) => ({ ...current, [definition.key]: nextVisible }))
+const layerDefinitions = [
+  { key: 'existing', label: 'Mövcud velo yolları', marker: 'map-line existing' },
+  { key: 'planned', label: 'Planlaşdırılan yollar', marker: 'map-line planned' },
+  { key: 'hubs', label: 'Mövcud və təklif edilən hub-lar', marker: 'map-dot hub' },
+  { key: 'heatmap', label: 'Hub sıxlığı heatmap', marker: 'map-heat' }
+]
+
+function MapView() {
+  const live = useLiveDashboard().data
+  const { cycling, hubs, heatmap } = live
+  const [layers, setLayers] = useState({ existing: true, planned: true, hubs: true, heatmap: true })
+  const [heatMetric, setHeatMetric] = useState('hubs')
+  const [selectedHub, setSelectedHub] = useState(null)
+  const unlocated = hubs.hubs.filter((hub) => !hub.coordinates)
+  const layerValue = {
+    existing: `${fmt(cycling.existing.geometry_length_km, 1)} km xəritədə`,
+    planned: `+${fmt(cycling.planned.length_km, 1)} km`,
+    hubs: `${hubs.counts.with_coordinates} nöqtə`,
+    heatmap: `${heatmap[heatMetric].point_count} nöqtə`
   }
-  const syncLayers = () => Object.entries(layers).forEach(([layer, visible]) => mapFrame.current?.contentWindow?.postMessage({ type: 'axin-layer-toggle', layer, visible }, '*'))
-  return <><SectionHeader eyebrow="VAHİD ŞƏBƏKƏ XƏRİTƏSİ" title="Mobility hub & last-mile xəritəsi" description="Avtobus, metro, velosiped zolaqları, hub-lar və əlaqəsiz məntəqələri eyni xəritədə analiz edin." action={<div className="header-actions"><button className="primary-button" type="button" onClick={openMap}><Icon name="external" size={15} /> Xəritəni ayrıca aç</button></div>} /><Panel className="map-panel"><div className="map-toolbar"><div className="map-legend">{layerDefinitions.map((definition) => <button type="button" className={`map-layer-toggle ${layers[definition.key] ? 'active' : 'inactive'}`} key={definition.key} onClick={() => toggleLayer(definition)} aria-pressed={layers[definition.key]}><span className="layer-check">{layers[definition.key] ? <Icon name="check" size={14} /> : <span />}</span><i className={definition.marker} /><span>{definition.label}</span></button>)}</div><StatusBadge tone="purple">Vahid multimodal şəbəkə · {future.lanes_km} km</StatusBadge></div><div className="map-frame"><iframe ref={mapFrame} onLoad={syncLayers} title="AXIN hub və last-mile xəritəsi" src="/processed/xerite_after.html" /></div><div className="map-footer"><span><b>{future.network_parts}</b> vahid şəbəkə</span><span><b>{future.hubs}</b> mobility hub</span><span><b>{future.disconnected}</b> last-mile boşluğu</span><span className="map-note">Xəritə: OSM + hakaton dataları</span></div></Panel></>
+  const toggle = (key) => setLayers((current) => ({ ...current, [key]: !current[key] }))
+  return <>
+    <SectionHeader eyebrow="GIS · VAHİD ŞƏBƏKƏ XƏRİTƏSİ" title="Velosiped şəbəkəsi və hub xəritəsi" description="Mövcud və planlaşdırılan velo yolları, hub nöqtələri və hub sıxlığı heatmap-ı. Qatları açıb-bağlayın, hub-a klik edərək detallara baxın." action={<div className="header-actions"><button className="secondary-button" type="button" onClick={openMap}><Icon name="external" size={15} /> Əvvəlki xəritə</button></div>} />
+    <Panel className="map-panel gis-panel">
+      <div className="map-toolbar">
+        <div className="map-legend">{layerDefinitions.map((definition) => <button type="button" className={`map-layer-toggle ${layers[definition.key] ? 'active' : 'inactive'}`} key={definition.key} onClick={() => toggle(definition.key)} aria-pressed={layers[definition.key]}><span className="layer-check">{layers[definition.key] ? <Icon name="check" size={14} /> : <span />}</span><i className={definition.marker} /><span>{definition.label}</span><em>{layerValue[definition.key]}</em></button>)}</div>
+        <div className="heat-metric" role="group" aria-label="Heatmap göstəricisi"><span>Heatmap:</span><button type="button" className={heatMetric === 'hubs' ? 'active' : ''} onClick={() => setHeatMetric('hubs')}>Hub sıxlığı</button><button type="button" className={heatMetric === 'stations' ? 'active' : ''} onClick={() => setHeatMetric('stations')}>Məntəqə sıxlığı</button></div>
+      </div>
+      <div className="gis-layout">
+        <div className="gis-map-wrap">
+          <Suspense fallback={<div className="gis-map-overlay"><div className="loader" /><span>Xəritə yüklənir…</span></div>}><GisMap existing={cycling.existing.geojson} planned={cycling.planned.geojson} hubs={hubs.geojson} heatmap={heatmap[heatMetric].geojson} layers={layers} selectedHubId={selectedHub} onSelectHub={setSelectedHub} /></Suspense>
+          <div className="gis-legend"><b>Leqend</b><span><i className="lg-line existing" /> Mövcud (tikilib)</span><span><i className="lg-line planned" /> Planlaşdırılır</span>{cycling.existing.qa_flagged_segments.length > 0 && <span><i className="lg-line qa" /> Keyfiyyət qeydi</span>}<span><i className="lg-dot proposed" /> Təklif edilən hub</span><span><i className="lg-dot candidate" /> Hub namizədi</span><span><i className="lg-heat" /> Sıxlıq: aşağı → yüksək</span></div>
+        </div>
+        <aside className="gis-side"><HubDetails hubId={selectedHub} version={live.version} onClose={() => setSelectedHub(null)} /></aside>
+      </div>
+      <div className="map-footer"><span><b>{fmt(cycling.existing.geometry_length_km, 1)} km</b> mövcud (xəritədə)</span><span><b>+{fmt(cycling.planned.length_km, 1)} km</b> planlaşdırılır</span><span><b>{hubs.counts.proposed}</b> təklif edilən hub</span><span><b>{hubs.counts.candidate}</b> namizəd</span><span className="map-note">{heatmap[heatMetric].description}</span></div>
+    </Panel>
+    <div className="dashboard-grid gis-notes">
+      {unlocated.length > 0
+        ? <Panel><PanelHeader title="Koordinatı yoxlanılmalı hub-lar" subtitle={`${unlocated.length} hub-un datasetdə koordinatı yoxdur — xəritədə və heatmap-da göstərilmir`} action={<StatusBadge tone="orange">Yoxlanılmalıdır</StatusBadge>} /><div className="unlocated-list">{unlocated.map((hub) => <span key={hub.id}><b>{hub.id}</b> {hub.name}</span>)}</div></Panel>
+        : <Panel><PanelHeader title="Hub koordinatları" subtitle={`Bütün ${hubs.counts.total} hub-un koordinatı datasetdən gəlir`} action={<StatusBadge tone="mint">Yoxlanılıb</StatusBadge>} /><ul className="dq-list"><li>Mənbə: layihənin GIS emalı (<b>hubs.geojson</b>).</li><li>6 təklif edilən hub mövcud xəritə ilə <b>0 m</b>, 26 metro hub-u OSM metro stansiyaları ilə <b>0 m</b>, 15 dayanacaq adındakı koordinatla <b>1–6 m</b> fərqlə üst-üstə düşür.</li><li>Koordinatı olmayan yeni hub əlavə olunsa, avtomatik bu siyahıya düşəcək və xəritədə göstərilməyəcək.</li></ul></Panel>}
+      <Panel className="wide-panel"><PanelHeader title="Velo şəbəkəsinin yenidən hesablanması" subtitle="Bəyan edilmiş göstərici xam GIS geometriyası ilə yoxlanılır" action={<VerificationBadge check={cycling.existing.verification.existing} label="Mövcud" />} /><LaneRecalculation existing={cycling.existing} /></Panel>
+    </div>
+  </>
 }
 
 function BeforeAfterView({ summary }) {
+  const infra = useLiveDashboard().data.comparison.infrastructure
   const before = summary.phases['ƏVVƏL']
   const after = summary.phases['GƏLƏCƏK']
   const comparison = [
-    { label: 'Velo zolaqları', before: `${fmt(before.lanes_km, 1)} km`, after: `${fmt(after.lanes_km, 1)} km` },
+    { label: 'Velo infrastrukturu (mövcud → plan)', before: `${fmt(infra.before_km, 1)} km`, after: `${fmt(infra.projected_total_km, 1)} km` },
     { label: 'Şəbəkə əhatəsi', before: `${fmt(before.coverage_pct, 1)}%`, after: `${fmt(after.coverage_pct, 1)}%` },
     { label: 'Əlaqəsiz məntəqə', before: fmt(before.disconnected), after: fmt(after.disconnected) },
     { label: 'Şəbəkə hissələri', before: before.network_parts, after: after.network_parts }
   ]
-  return <><SectionHeader eyebrow="VƏZİYYƏT → SSENARİ" title="Şəbəkənin vahid sistemə çevrilməsi" description="Parçalı velo şəbəkəsindən mobility hub və last-mile bağlantıları ilə vahid multimodal sistemə keçidi yan-yana müqayisə edin." action={<StatusBadge tone="mint">+{fmt(after.lanes_km - before.lanes_km, 1)} km · vahid şəbəkə</StatusBadge>} /><div className="comparison-grid">{comparison.map((item) => <div className="comparison-stat" key={item.label}><span>{item.label}</span><div><b>{item.before}</b><Icon name="chevron" size={14} /><strong>{item.after}</strong></div></div>)}</div><div className="before-after-grid"><Panel className="compare-panel"><div className="compare-heading"><div><span className="eyebrow">ƏVVƏL · 2025</span><h3>Parçalı şəbəkə</h3></div><StatusBadge tone="gray">{before.network_parts} hissə</StatusBadge></div><div className="compare-map"><iframe title="2025 mövcud şəbəkə xəritəsi" src="/processed/xerite_before.html" /></div><div className="compare-footer"><span><b>{fmt(before.lanes_km, 1)} km</b> zolaq</span><span><b>{fmt(before.disconnected)}</b> last-mile boşluğu</span><span><b>{fmt(before.coverage_pct, 1)}%</b> əhatə</span></div></Panel><Panel className="compare-panel after"><div className="compare-heading"><div><span className="eyebrow mint">SONRA · HUB SSENARİSİ</span><h3>Vahid hub + last-mile sistemi</h3></div><StatusBadge tone="mint">{after.network_parts} hissə</StatusBadge></div><div className="compare-map"><iframe title="İnkişaf ssenarisi xəritəsi" src="/processed/xerite_after.html" /></div><div className="compare-footer"><span><b>{fmt(after.lanes_km, 1)} km</b> zolaq</span><span><b>{fmt(after.disconnected)}</b> last-mile boşluğu</span><span><b>{fmt(after.coverage_pct, 1)}%</b> əhatə</span></div></Panel></div></>
+  return <><SectionHeader eyebrow="VƏZİYYƏT → SSENARİ" title="Şəbəkənin vahid sistemə çevrilməsi" description="Parçalı velo şəbəkəsindən mobility hub və last-mile bağlantıları ilə vahid multimodal sistemə keçidi yan-yana müqayisə edin." action={<StatusBadge tone="mint">+{fmt(infra.addition_km, 1)} km planlaşdırılır · +{fmt(infra.growth_pct, 2)}%</StatusBadge>} /><div className="comparison-grid">{comparison.map((item) => <div className="comparison-stat" key={item.label}><span>{item.label}</span><div><b>{item.before}</b><Icon name="chevron" size={14} /><strong>{item.after}</strong></div></div>)}</div><div className="before-after-grid"><Panel className="compare-panel"><div className="compare-heading"><div><span className="eyebrow">ƏVVƏL · 2025</span><h3>Parçalı şəbəkə</h3></div><StatusBadge tone="gray">{before.network_parts} hissə</StatusBadge></div><div className="compare-map"><iframe title="2025 mövcud şəbəkə xəritəsi" src="/processed/xerite_before.html" /></div><div className="compare-footer"><span><b>{fmt(before.lanes_km, 1)} km</b> zolaq</span><span><b>{fmt(before.disconnected)}</b> last-mile boşluğu</span><span><b>{fmt(before.coverage_pct, 1)}%</b> əhatə</span></div></Panel><Panel className="compare-panel after"><div className="compare-heading"><div><span className="eyebrow mint">SONRA · HUB SSENARİSİ</span><h3>Vahid hub + last-mile sistemi</h3></div><StatusBadge tone="mint">{after.network_parts} hissə</StatusBadge></div><div className="compare-map"><iframe title="İnkişaf ssenarisi xəritəsi" src="/processed/xerite_after.html" /></div><div className="compare-footer"><span><b>{fmt(after.lanes_km, 1)} km</b> zolaq</span><span><b>{fmt(after.disconnected)}</b> last-mile boşluğu</span><span><b>{fmt(after.coverage_pct, 1)}%</b> əhatə</span></div></Panel></div></>
 }
 
 function ConnectionsView({ connections }) {

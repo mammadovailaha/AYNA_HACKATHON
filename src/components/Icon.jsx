@@ -19,7 +19,11 @@ const paths = {
   filter: <path d="M4 6h16M7 12h10M10 18h4" />,
   check: <path d="m5 12 4 4L19 6" />,
   external: <><path d="M14 4h6v6M20 4l-9 9" /><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /></>,
-  bike: <><circle cx="6" cy="17" r="3" /><circle cx="18" cy="17" r="3" /><path d="M6 17 10 7h4l4 10M10 7l3 10M8 11h8" /></>
+  bike: <><circle cx="6" cy="17" r="3" /><circle cx="18" cy="17" r="3" /><path d="M6 17 10 7h4l4 10M10 7l3 10M8 11h8" /></>,
+  layers: <><path d="m12 3 9 5-9 5-9-5 9-5Z" /><path d="m3 13 9 5 9-5" /></>,
+  activity: <path d="M3 12h4l3 7 4-14 3 7h4" />,
+  close: <path d="M6 6l12 12M18 6 6 18" />,
+  alert: <><path d="M12 3 2 20h20L12 3Z" /><path d="M12 10v4M12 17h.01" /></>
 }
 
 export default function Icon({ name, size = 18, strokeWidth = 1.8, className = '' }) {
