@@ -86,6 +86,11 @@ function send(res, event, data) {
   res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)
 }
 
+// Vercel serverless: fayl sistemi yalnız oxunur (data yeni deploy ilə dəyişir) və
+// funksiyanın icra müddəti məhduddur — axın vaxtaşırı bağlanır, klient dərhal yenidən qoşulur.
+const SERVERLESS = Boolean(process.env.VERCEL)
+const SERVERLESS_STREAM_MS = 50000
+
 function stream(req, res) {
   res.writeHead(200, {
     'Content-Type': 'text/event-stream; charset=utf-8',
@@ -94,17 +99,33 @@ function stream(req, res) {
     'X-Accel-Buffering': 'no'
   })
   res.write('retry: 3000\n\n')
-  send(res, 'hello', { version: store.snapshot?.version ?? null, last_data_error: store.lastError })
+  send(res, 'hello', { version: store.snapshot?.version ?? null, last_data_error: store.lastError, live_file_updates: !SERVERLESS })
   clients.add(res)
-  req.on('close', () => clients.delete(res))
+  let timer = null
+  if (SERVERLESS) {
+    timer = setTimeout(() => {
+      send(res, 'reconnect', { reason: 'serverless-timeout' })
+      res.end()
+    }, SERVERLESS_STREAM_MS)
+  }
+  req.on('close', () => {
+    clearTimeout(timer)
+    clients.delete(res)
+  })
 }
 
-let started = false
-export async function startDataLayer() {
-  if (started) return
-  started = true
+let started = null
+export function startDataLayer() {
+  started ??= initDataLayer().catch((error) => {
+    started = null
+    throw error
+  })
+  return started
+}
+
+async function initDataLayer() {
   await store.load()
-  store.watch()
+  if (!SERVERLESS) store.watch()
   store.on('change', (payload) => {
     console.log(`[data] yeniləndi → ${payload.version} (${payload.files.join(', ')})`)
     clients.forEach((res) => send(res, 'data-updated', payload))

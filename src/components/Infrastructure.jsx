@@ -145,6 +145,8 @@ export function RealtimeStatus({ compact = false }) {
     </dl>
     {connection.dataError && <p className="rt-error">Data faylında xəta: {connection.dataError.message}. Son düzgün versiya göstərilir.</p>}
     {error && data && <p className="rt-error">Son sorğu alınmadı: {error}</p>}
-    <p className="rt-note">Mənbə: server data store (SSE ilə push). Hakaton dataseti statikdir — dəyişiklik yalnız data faylları yeniləndikdə baş verir.</p>
+    <p className="rt-note">{connection.info?.live_file_updates === false
+      ? 'Mənbə: Vercel serverless API (SSE). Data faylları yalnız yeni deploy ilə dəyişir — hər deploydan sonra açıq səhifələr yeni versiyanı avtomatik yükləyir.'
+      : 'Mənbə: server data store (SSE ilə push). Hakaton dataseti statikdir — dəyişiklik yalnız data faylları yeniləndikdə baş verir.'}</p>
   </div>
 }

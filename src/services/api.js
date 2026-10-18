@@ -53,12 +53,17 @@ export function openDataStream({ onStatus, onUpdate, onDataError }) {
   let retryTimer = null
   let closed = false
 
-  const connect = () => {
-    onStatus(attempt === 0 ? 'connecting' : 'reconnecting', { attempt })
+  // quiet: serverin planlı bağlantı yeniləməsi (serverless limit) — status dəyişmir
+  const connect = (quiet = false) => {
+    if (!quiet) onStatus(attempt === 0 ? 'connecting' : 'reconnecting', { attempt })
     source = new EventSource(`${API_ROOT}/stream`)
     source.addEventListener('hello', (event) => {
       attempt = 0
       onStatus('live', JSON.parse(event.data))
+    })
+    source.addEventListener('reconnect', () => {
+      source.close()
+      if (!closed) connect(true)
     })
     source.addEventListener('data-updated', (event) => onUpdate(JSON.parse(event.data)))
     source.addEventListener('data-error', (event) => onDataError?.(JSON.parse(event.data)))
