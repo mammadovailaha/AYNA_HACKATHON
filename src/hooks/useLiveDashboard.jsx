@@ -5,8 +5,8 @@ import { api, openDataStream } from '../services/api'
 const LiveDataContext = createContext(null)
 
 async function loadAll() {
-  const [dataset, summary, analytics, comparison, existing, planned, hubs, heatHubs, heatStations] = await Promise.all([
-    api.dataset(), api.summary(), api.analytics(), api.comparison(), api.cyclingExisting(), api.cyclingPlanned(), api.hubs(), api.heatmap('hubs'), api.heatmap('stations')
+  const [dataset, summary, analytics, comparison, existing, planned, hubs, heatHubs, heatStations, network] = await Promise.all([
+    api.dataset(), api.summary(), api.analytics(), api.comparison(), api.cyclingExisting(), api.cyclingPlanned(), api.hubs(), api.heatmap('hubs'), api.heatmap('stations'), api.hubNetwork()
   ])
   return {
     version: summary.meta.version,
@@ -17,7 +17,8 @@ async function loadAll() {
     comparison: comparison.data,
     cycling: { existing: existing.data, planned: planned.data },
     hubs: hubs.data,
-    heatmap: { hubs: heatHubs.data, stations: heatStations.data }
+    heatmap: { hubs: heatHubs.data, stations: heatStations.data },
+    hubNetwork: network.data
   }
 }
 

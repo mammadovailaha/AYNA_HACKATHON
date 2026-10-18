@@ -43,7 +43,8 @@ export const api = {
   cyclingTotal: () => get('/cycling/total'),
   hubs: (params) => get('/hubs', params),
   hub: (id) => get(`/hubs/${encodeURIComponent(id)}`),
-  heatmap: (metric) => get('/hubs/heatmap', { metric })
+  heatmap: (metric) => get('/hubs/heatmap', { metric }),
+  hubNetwork: () => get('/hubs/network')
 }
 
 // SSE bağlantısı: kəsiləndə eksponensial gecikmə ilə (1s → 30s) yenidən qoşulur.

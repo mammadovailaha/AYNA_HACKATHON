@@ -51,7 +51,8 @@ export function createApiRouter() {
     status: oneOf(req.query.status, ['existing', 'proposed', 'candidate'], 'status'),
     hasCoordinates: booleanParam(req.query.has_coordinates, 'has_coordinates')
   })))
-  // /hubs/heatmap /hubs/:id-dən əvvəl gəlməlidir
+  // /hubs/heatmap və /hubs/network /hubs/:id-dən əvvəl gəlməlidir
+  api.get('/hubs/network', route((model) => dashboard.hubNetwork(model)))
   api.get('/hubs/heatmap', route((model, req) => dashboard.heatmap(model, oneOf(req.query.metric, Object.keys(dashboard.HEATMAP_METRICS), 'metric') ?? 'hubs')))
   api.get('/hubs/:id', route((model, req) => {
     if (!/^H\d{1,3}$/i.test(req.params.id)) throw new ApiError(400, 'VALIDATION_ERROR', 'Hub ID formatı "H" + rəqəm olmalıdır (məs. H19)', { parameter: 'id', received: req.params.id })

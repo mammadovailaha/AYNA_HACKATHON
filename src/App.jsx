@@ -1,12 +1,10 @@
-import React, { lazy, Suspense, useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import Icon from './components/Icon'
 import { AreaChart, Bars, DonutChart } from './components/Charts'
 import { EmptyState, MetricCard, Panel, PanelHeader, SectionHeader, StatusBadge } from './components/Ui'
 import { useDashboardData } from './hooks/useDashboardData'
 import { useLiveDashboard } from './hooks/useLiveDashboard'
-// MapLibre böyük kitabxanadır — yalnız xəritə bölməsi açılanda yüklənir
-const GisMap = lazy(() => import('./components/GisMap'))
-import HubDetails from './components/HubDetails'
+import NetworkMap from './components/NetworkMap'
 import { ComparisonTable, InfrastructureCards, InfrastructureGrowthChart, LaneRecalculation, RealtimeStatus, VerificationBadge } from './components/Infrastructure'
 
 const navItems = [
@@ -134,54 +132,43 @@ function Overview({ summary, connections, hubs, finance }) {
   </>
 }
 
-const layerDefinitions = [
-  { key: 'existing', label: 'Mövcud velo yolları', marker: 'map-line existing' },
-  { key: 'planned', label: 'Planlaşdırılan yollar', marker: 'map-line planned' },
-  { key: 'hubs', label: 'Mövcud və təklif edilən hub-lar', marker: 'map-dot hub' },
-  { key: 'heatmap', label: 'Hub sıxlığı heatmap', marker: 'map-heat' }
-]
-
 function MapView() {
   const live = useLiveDashboard().data
-  const { cycling, hubs, heatmap } = live
-  const [layers, setLayers] = useState({ existing: true, planned: true, hubs: true, heatmap: true })
-  const [heatMetric, setHeatMetric] = useState('hubs')
-  const [selectedHub, setSelectedHub] = useState(null)
+  const { cycling, hubs, hubNetwork } = live
   const unlocated = hubs.hubs.filter((hub) => !hub.coordinates)
-  const layerValue = {
-    existing: `${fmt(cycling.existing.geometry_length_km, 1)} km xəritədə`,
-    planned: `+${fmt(cycling.planned.length_km, 1)} km`,
-    hubs: `${hubs.counts.with_coordinates} nöqtə`,
-    heatmap: `${heatmap[heatMetric].point_count} nöqtə`
-  }
-  const toggle = (key) => setLayers((current) => ({ ...current, [key]: !current[key] }))
+  // HUB xəritəsi: əvvəlki qatlar default açıq qalır; yeni radius qatı istifadəçi seçimi ilə açılır
+  const toggles = [
+    { key: 'existing', label: 'Mövcud velo yolları', value: `${fmt(cycling.existing.geometry_length_km, 1)} km xəritədə` },
+    { key: 'planned', label: 'Planlaşdırılan yollar', value: `+${fmt(cycling.planned.length_km, 1)} km` },
+    { key: 'hubs', label: 'HUB şəbəkəsi', value: `${hubs.counts.with_coordinates} hub` },
+    { key: 'links', label: 'HUB-lar arası əlaqələr', value: `${hubNetwork.links.features.length} əlaqə` },
+    { key: 'radius', label: 'HUB radiusları', value: `${hubNetwork.config.coverage_radius_m} m` },
+    { key: 'heatmap', label: 'Sıxlıq heatmap' },
+    { key: 'stations', label: 'Mikromobillik məntəqələri', value: `${hubNetwork.counts.stations_total}` }
+  ]
   return <>
-    <SectionHeader eyebrow="GIS · VAHİD ŞƏBƏKƏ XƏRİTƏSİ" title="Velosiped şəbəkəsi və hub xəritəsi" description="Mövcud və planlaşdırılan velo yolları, hub nöqtələri və hub sıxlığı heatmap-ı. Qatları açıb-bağlayın, hub-a klik edərək detallara baxın." action={<div className="header-actions"><button className="secondary-button" type="button" onClick={openMap}><Icon name="external" size={15} /> Əvvəlki xəritə</button></div>} />
-    <Panel className="map-panel gis-panel">
-      <div className="map-toolbar">
-        <div className="map-legend">{layerDefinitions.map((definition) => <button type="button" className={`map-layer-toggle ${layers[definition.key] ? 'active' : 'inactive'}`} key={definition.key} onClick={() => toggle(definition.key)} aria-pressed={layers[definition.key]}><span className="layer-check">{layers[definition.key] ? <Icon name="check" size={14} /> : <span />}</span><i className={definition.marker} /><span>{definition.label}</span><em>{layerValue[definition.key]}</em></button>)}</div>
-        <div className="heat-metric" role="group" aria-label="Heatmap göstəricisi"><span>Heatmap:</span><button type="button" className={heatMetric === 'hubs' ? 'active' : ''} onClick={() => setHeatMetric('hubs')}>Hub sıxlığı</button><button type="button" className={heatMetric === 'stations' ? 'active' : ''} onClick={() => setHeatMetric('stations')}>Məntəqə sıxlığı</button></div>
-      </div>
-      <div className="gis-layout">
-        <div className="gis-map-wrap">
-          <Suspense fallback={<div className="gis-map-overlay"><div className="loader" /><span>Xəritə yüklənir…</span></div>}><GisMap existing={cycling.existing.geojson} planned={cycling.planned.geojson} hubs={hubs.geojson} heatmap={heatmap[heatMetric].geojson} layers={layers} selectedHubId={selectedHub} onSelectHub={setSelectedHub} /></Suspense>
-          <div className="gis-legend"><b>Leqend</b><span><i className="lg-line existing" /> Mövcud (tikilib)</span><span><i className="lg-line planned" /> Planlaşdırılır</span>{cycling.existing.qa_flagged_segments.length > 0 && <span><i className="lg-line qa" /> Keyfiyyət qeydi</span>}<span><i className="lg-dot proposed" /> Təklif edilən hub</span><span><i className="lg-dot candidate" /> Hub namizədi</span><span><i className="lg-heat" /> Sıxlıq: aşağı → yüksək</span></div>
-        </div>
-        <aside className="gis-side"><HubDetails hubId={selectedHub} version={live.version} onClose={() => setSelectedHub(null)} /></aside>
-      </div>
-      <div className="map-footer"><span><b>{fmt(cycling.existing.geometry_length_km, 1)} km</b> mövcud (xəritədə)</span><span><b>+{fmt(cycling.planned.length_km, 1)} km</b> planlaşdırılır</span><span><b>{hubs.counts.proposed}</b> təklif edilən hub</span><span><b>{hubs.counts.candidate}</b> namizəd</span><span className="map-note">{heatmap[heatMetric].description}</span></div>
-    </Panel>
+    <SectionHeader eyebrow="GIS · HUB ŞƏBƏKƏSİ" title="HUB xəritəsi" description="Peyk görünüşündə mərkəzi hub-lar, ulduz şəbəkəsi əlaqələri, əhatə radiusları və sıxlıq. Hub-a klik edin — ona aid məntəqələr, zolaqlar və əlaqələr vurğulanacaq." action={<div className="header-actions"><button className="secondary-button" type="button" onClick={openMap}><Icon name="external" size={15} /> Əvvəlki xəritə</button></div>} />
+    <NetworkMap title="HUB xəritəsi" toggles={toggles} heatMetricSwitch defaults={{ existing: true, planned: true, hubs: true, links: true, radius: false, heatmap: false, stations: false }} />
     <div className="dashboard-grid gis-notes">
       {unlocated.length > 0
         ? <Panel><PanelHeader title="Koordinatı yoxlanılmalı hub-lar" subtitle={`${unlocated.length} hub-un datasetdə koordinatı yoxdur — xəritədə və heatmap-da göstərilmir`} action={<StatusBadge tone="orange">Yoxlanılmalıdır</StatusBadge>} /><div className="unlocated-list">{unlocated.map((hub) => <span key={hub.id}><b>{hub.id}</b> {hub.name}</span>)}</div></Panel>
-        : <Panel><PanelHeader title="Hub koordinatları" subtitle={`Bütün ${hubs.counts.total} hub-un koordinatı datasetdən gəlir`} action={<StatusBadge tone="mint">Yoxlanılıb</StatusBadge>} /><ul className="dq-list"><li>Mənbə: layihənin GIS emalı (<b>hubs.geojson</b>).</li><li>6 təklif edilən hub mövcud xəritə ilə <b>0 m</b>, 26 metro hub-u OSM metro stansiyaları ilə <b>0 m</b>, 15 dayanacaq adındakı koordinatla <b>1–6 m</b> fərqlə üst-üstə düşür.</li><li>Koordinatı olmayan yeni hub əlavə olunsa, avtomatik bu siyahıya düşəcək və xəritədə göstərilməyəcək.</li></ul></Panel>}
+        : <Panel><PanelHeader title="HUB şəbəkəsinin qurulma qaydası" subtitle={`Bütün ${hubs.counts.total} hub-un koordinatı datasetdən gəlir`} action={<StatusBadge tone="mint">Real koordinatlar</StatusBadge>} /><ul className="dq-list">
+          <li><b>Mərkəzi hub-lar:</b> {hubNetwork.counts.central} təklif edilən hub; {hubNetwork.config.backbone_rule.toLowerCase()} ({hubNetwork.counts.backbone_links} magistral əlaqə).</li>
+          <li><b>Əlaqələr:</b> {hubNetwork.config.link_rule}. Bağlı: {hubNetwork.counts.satellites_linked}, kənarda qalan: {hubNetwork.counts.satellites_unlinked}.</li>
+          <li><b>Radius:</b> {hubNetwork.config.coverage_radius_m} m — {hubNetwork.config.coverage_radius_source}. Kəsişən radiuslar: {hubNetwork.counts.overlaps} ortaq zona.</li>
+          <li><b>Hub-a aid elementlər:</b> {hubNetwork.config.member_rule}.</li>
+          <li><b>Heatmap:</b> hub nöqtələrinin sıxlığıdır (avtobus xətti sayı ilə çəkilib) — real sərnişin axını deyil.</li>
+          <li>Koordinat mənbəyi: <b>hubs.geojson</b> (xəritə, OSM metro və dayanacaq koordinatları ilə ≤6 m yoxlanılıb).</li>
+        </ul></Panel>}
       <Panel className="wide-panel"><PanelHeader title="Velo şəbəkəsinin yenidən hesablanması" subtitle="Bəyan edilmiş göstərici xam GIS geometriyası ilə yoxlanılır" action={<VerificationBadge check={cycling.existing.verification.existing} label="Mövcud" />} /><LaneRecalculation existing={cycling.existing} /></Panel>
     </div>
   </>
 }
 
 function BeforeAfterView({ summary }) {
-  const infra = useLiveDashboard().data.comparison.infrastructure
+  const live = useLiveDashboard().data
+  const infra = live.comparison.infrastructure
+  const { hubNetwork, cycling } = live
   const before = summary.phases['ƏVVƏL']
   const after = summary.phases['GƏLƏCƏK']
   const comparison = [
@@ -190,7 +177,27 @@ function BeforeAfterView({ summary }) {
     { label: 'Əlaqəsiz məntəqə', before: fmt(before.disconnected), after: fmt(after.disconnected) },
     { label: 'Şəbəkə hissələri', before: before.network_parts, after: after.network_parts }
   ]
-  return <><SectionHeader eyebrow="VƏZİYYƏT → SSENARİ" title="Şəbəkənin vahid sistemə çevrilməsi" description="Parçalı velo şəbəkəsindən mobility hub və last-mile bağlantıları ilə vahid multimodal sistemə keçidi yan-yana müqayisə edin." action={<StatusBadge tone="mint">+{fmt(infra.addition_km, 1)} km planlaşdırılır · +{fmt(infra.growth_pct, 2)}%</StatusBadge>} /><div className="comparison-grid">{comparison.map((item) => <div className="comparison-stat" key={item.label}><span>{item.label}</span><div><b>{item.before}</b><Icon name="chevron" size={14} /><strong>{item.after}</strong></div></div>)}</div><div className="before-after-grid"><Panel className="compare-panel"><div className="compare-heading"><div><span className="eyebrow">ƏVVƏL · 2025</span><h3>Parçalı şəbəkə</h3></div><StatusBadge tone="gray">{before.network_parts} hissə</StatusBadge></div><div className="compare-map"><iframe title="2025 mövcud şəbəkə xəritəsi" src="/processed/xerite_before.html" /></div><div className="compare-footer"><span><b>{fmt(before.lanes_km, 1)} km</b> zolaq</span><span><b>{fmt(before.disconnected)}</b> last-mile boşluğu</span><span><b>{fmt(before.coverage_pct, 1)}%</b> əhatə</span></div></Panel><Panel className="compare-panel after"><div className="compare-heading"><div><span className="eyebrow mint">SONRA · HUB SSENARİSİ</span><h3>Vahid hub + last-mile sistemi</h3></div><StatusBadge tone="mint">{after.network_parts} hissə</StatusBadge></div><div className="compare-map"><iframe title="İnkişaf ssenarisi xəritəsi" src="/processed/xerite_after.html" /></div><div className="compare-footer"><span><b>{fmt(after.lanes_km, 1)} km</b> zolaq</span><span><b>{fmt(after.disconnected)}</b> last-mile boşluğu</span><span><b>{fmt(after.coverage_pct, 1)}%</b> əhatə</span></div></Panel></div></>
+  // Default: yalnız mövcud vəziyyət. Yeni ssenarinin hər elementi istifadəçi seçimi ilə açılır.
+  const toggles = [
+    { key: 'existing', label: 'Mövcud velo zolaqları', value: `${fmt(cycling.existing.geometry_length_km, 1)} km`, group: 'base' },
+    { key: 'stations', label: 'Mikromobillik məntəqələri', value: `${hubNetwork.counts.stations_total}`, group: 'base' },
+    { key: 'hubs', label: 'HUB şəbəkəsini göstər', group: 'scenario' },
+    { key: 'radius', label: 'HUB radiuslarını göstər', group: 'scenario' },
+    { key: 'links', label: 'HUB-lar arasındakı əlaqələri göstər', group: 'scenario' },
+    { key: 'heatmap', label: 'Sıxlıq Heatmap-ini göstər', group: 'scenario' },
+    { key: 'planned', label: 'Yeni təklif olunan infrastrukturu göstər', value: `+${fmt(cycling.planned.length_km, 1)} km`, group: 'scenario' }
+  ]
+  const footer = <>
+    <span><b>{fmt(before.disconnected)}</b> → <b>{fmt(after.disconnected)}</b> əlaqəsiz məntəqə</span>
+    <span><b>{fmt(before.coverage_pct, 1)}%</b> → <b>{fmt(after.coverage_pct, 1)}%</b> əhatə</span>
+    <span><b>{before.network_parts}</b> → <b>{after.network_parts}</b> şəbəkə hissəsi</span>
+    <span className="map-note">Default: mövcud vəziyyət · yeni ssenari qatları checkbox ilə aktivləşir</span>
+  </>
+  return <>
+    <SectionHeader eyebrow="VƏZİYYƏT → SSENARİ" title="Şəbəkənin vahid sistemə çevrilməsi" description="Mövcud vəziyyət və yeni ssenari eyni xəritədə: əvvəlcə mövcud şəbəkəni görün, sonra hub, radius, əlaqə, heatmap və yeni infrastruktur qatlarını bir-bir aktivləşdirin." action={<StatusBadge tone="mint">+{fmt(infra.addition_km, 1)} km planlaşdırılır · +{fmt(infra.growth_pct, 2)}%</StatusBadge>} />
+    <div className="comparison-grid">{comparison.map((item) => <div className="comparison-stat" key={item.label}><span>{item.label}</span><div><b>{item.before}</b><Icon name="chevron" size={14} /><strong>{item.after}</strong></div></div>)}</div>
+    <NetworkMap title="Şəbəkə ssenarisi xəritəsi" toggles={toggles} footer={footer} scenarioKey="planned" defaults={{ existing: true, stations: true, hubs: false, radius: false, links: false, heatmap: false, planned: false }} />
+  </>
 }
 
 function ConnectionsView({ connections }) {

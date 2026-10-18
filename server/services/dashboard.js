@@ -1,6 +1,6 @@
 // Biznes məntiqi: data store snapshot-ından API cavablarını hesablayır.
 // Nəticələr snapshot versiyasına görə keşlənir; fayl dəyişən kimi yenidən hesablanır.
-import { geodesicLineKm, haversineM, pointToLineM, round } from '../lib/geo.js'
+import { circleRing, geodesicLineKm, haversineM, pointToLineM, round } from '../lib/geo.js'
 import { booleanValue, numberValue } from '../../src/lib/csv.js'
 
 const STATION_RADIUS_M = 300
@@ -288,7 +288,7 @@ export const HEATMAP_METRICS = {
 export function heatmap(model, metric) {
   let features
   if (metric === 'stations') {
-    features = model.stations.map((station) => ({ type: 'Feature', properties: { weight: 1, status: station.properties.status }, geometry: station.geometry }))
+    features = model.stations.map((station) => ({ type: 'Feature', properties: { id: station.properties.id, weight: 1, status: station.properties.status }, geometry: station.geometry }))
   } else {
     const located = model.hubs.filter((hub) => hub.coordinates)
     const max = Math.max(...located.map((hub) => hub.transit.bus_line_count), 1)
@@ -348,4 +348,120 @@ export function comparison(model) {
     },
     geometry_check: { existing_geometry_km: existingGeometryKm, planned_geometry_km: plannedGeometryKm }
   }
+}
+
+// --- HUB şəbəkəsi: ulduz topologiyası, əhatə radiusları, kəsişmələr və hub-a aid obyektlər ---
+// Bütün məsafələr real koordinatlardan hesablanır; parametrlər server/data/hub-network.json-dadır.
+const lensArea = (r, d) => 2 * r * r * Math.acos(d / (2 * r)) - (d / 2) * Math.sqrt(4 * r * r - d * d)
+
+function lensPolygon(a, b, r) {
+  const ringA = circleRing(a, r, 96).slice(0, -1)
+  const ringB = circleRing(b, r, 96).slice(0, -1)
+  const inside = (p, c) => haversineM(p, c) <= r
+  const points = [...ringA.filter((p) => inside(p, b)), ...ringB.filter((p) => inside(p, a))]
+  if (points.length < 3) return null
+  const cx = points.reduce((s, p) => s + p[0], 0) / points.length
+  const cy = points.reduce((s, p) => s + p[1], 0) / points.length
+  points.sort((p, q) => Math.atan2(p[1] - cy, p[0] - cx) - Math.atan2(q[1] - cy, q[0] - cx))
+  return [...points, points[0]]
+}
+
+// Prim alqoritmi: mərkəzi hub-lar arasında minimal örtücü ağac
+function minimumSpanningTree(nodes) {
+  if (nodes.length < 2) return []
+  const inTree = new Set([0])
+  const edges = []
+  while (inTree.size < nodes.length) {
+    let best = null
+    for (const i of inTree) {
+      nodes.forEach((node, j) => {
+        if (inTree.has(j)) return
+        const distance = haversineM(nodes[i].point, node.point)
+        if (!best || distance < best.distance) best = { from: nodes[i], to: node, distance, j }
+      })
+    }
+    inTree.add(best.j)
+    edges.push(best)
+  }
+  return edges
+}
+
+export function hubNetwork(model) {
+  if (model.network) return model.network
+  const config = model.data.hubNetwork
+  const r = config.coverage_radius_m
+  const located = model.hubs.filter((hub) => hub.coordinates).map((hub) => ({ hub, point: [hub.coordinates.lng, hub.coordinates.lat] }))
+  const central = located.filter(({ hub }) => hub.status === (config.central_status ?? 'proposed'))
+  const satellites = located.filter(({ hub }) => hub.status !== (config.central_status ?? 'proposed'))
+
+  const link = (type, from, to, distance) => ({
+    type: 'Feature',
+    properties: { id: `${from.hub.id}-${to.hub.id}`, type, from: from.hub.id, to: to.hub.id, distance_m: Math.round(distance) },
+    geometry: { type: 'LineString', coordinates: [from.point, to.point] }
+  })
+  const links = minimumSpanningTree(central).map((e) => link('backbone', e.from, e.to, e.distance))
+  const unlinked = []
+  for (const sat of satellites) {
+    const nearest = central.reduce((best, c) => {
+      const distance = haversineM(sat.point, c.point)
+      return distance < best.distance ? { c, distance } : best
+    }, { c: null, distance: Infinity })
+    if (nearest.c && nearest.distance <= config.link_max_m) links.push(link('spoke', nearest.c, sat, nearest.distance))
+    else unlinked.push({ id: sat.hub.id, name: sat.hub.name, nearest_central_m: Math.round(nearest.distance) })
+  }
+
+  const overlaps = []
+  for (let i = 0; i < located.length; i += 1) {
+    for (let j = i + 1; j < located.length; j += 1) {
+      const distance = haversineM(located[i].point, located[j].point)
+      if (distance >= 2 * r) continue
+      const ring = lensPolygon(located[i].point, located[j].point, r)
+      if (!ring) continue
+      overlaps.push({
+        type: 'Feature',
+        properties: { id: `${located[i].hub.id}-${located[j].hub.id}`, hubs: [located[i].hub.id, located[j].hub.id], distance_m: Math.round(distance), overlap_area_m2: Math.round(lensArea(r, distance)) },
+        geometry: { type: 'Polygon', coordinates: [ring] }
+      })
+    }
+  }
+
+  const lanes = [...model.existingLanes.map((f) => ({ f, kind: 'existing' })), ...model.plannedFeatures.map((f) => ({ f, kind: 'planned' }))]
+  const members = {}
+  const circles = located.map(({ hub, point }) => {
+    const stations = model.stations.filter((s) => haversineM(point, s.geometry.coordinates) <= r).map((s) => s.properties.id)
+    const laneIds = lanes.filter(({ f }) => pointToLineM(point, f.geometry.coordinates) <= r)
+    const hubLinks = links.filter((l) => l.properties.from === hub.id || l.properties.to === hub.id).map((l) => l.properties.id)
+    members[hub.id] = {
+      stations,
+      existing_lanes: laneIds.filter((l) => l.kind === 'existing').map((l) => l.f.properties.id),
+      planned_lanes: laneIds.filter((l) => l.kind === 'planned').map((l) => l.f.properties.id),
+      links: hubLinks,
+      overlaps_with: overlaps.filter((o) => o.properties.hubs.includes(hub.id)).map((o) => o.properties.hubs.find((id) => id !== hub.id))
+    }
+    return {
+      type: 'Feature',
+      properties: { id: hub.id, name: hub.name, status: hub.status, role: hub.status === (config.central_status ?? 'proposed') ? 'central' : 'satellite', radius_m: r, stations: stations.length },
+      geometry: { type: 'Polygon', coordinates: [circleRing(point, r)] }
+    }
+  })
+
+  model.network = {
+    config,
+    counts: {
+      hubs: located.length,
+      central: central.length,
+      satellites_linked: links.filter((l) => l.properties.type === 'spoke').length,
+      satellites_unlinked: unlinked.length,
+      backbone_links: links.filter((l) => l.properties.type === 'backbone').length,
+      overlaps: overlaps.length,
+      stations_covered: new Set(Object.values(members).flatMap((m) => m.stations)).size,
+      stations_total: model.stations.length
+    },
+    unlinked,
+    members,
+    links: { type: 'FeatureCollection', features: links },
+    circles: { type: 'FeatureCollection', features: circles },
+    overlaps: { type: 'FeatureCollection', features: overlaps }
+  }
+  return model.network
 }

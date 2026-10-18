@@ -252,3 +252,50 @@ body { background: #f6f8fc; -webkit-font-smoothing: antialiased; }
   .heat-metric { width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* Vahid şəbəkə xəritəsi (Şəbəkə ssenarisi + HUB xəritəsi) */
+.network-workspace { padding: 0; overflow: hidden; margin-bottom: 16px; }
+.network-toolbar { flex-wrap: wrap; align-items: flex-start; border-bottom: 1px solid var(--line); }
+.network-toolbar .map-legend { flex: 1 1 520px; gap: 8px; }
+.map-layer-toggle { cursor: pointer; user-select: none; }
+.map-layer-toggle input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.map-layer-toggle:focus-within { outline: 2px solid var(--blue-600); outline-offset: 2px; }
+.map-layer-toggle.scenario { border-style: dashed; }
+.map-layer-toggle.scenario.active { border-style: solid; background: var(--green-50); }
+.map-layer-toggle.scenario.active .layer-check { background: var(--green-600) !important; border-color: var(--green-600) !important; }
+.map-tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.expand-button { white-space: nowrap; }
+.network-meta { border-top: 1px solid var(--line); flex-wrap: wrap; row-gap: 6px; }
+.network-workspace .map-footer + .map-footer { border-top: 1px solid #f1f4f9; }
+
+/* Genişləndirilmiş (tam ekran) rejim: toolbar, checkbox-lar, xəritə və detallar birlikdə */
+.network-workspace.is-expanded { position: fixed; inset: 0; z-index: 1000; margin: 0; border-radius: 0; display: flex; flex-direction: column; animation: none; }
+.network-workspace.is-expanded .gis-layout { flex: 1; min-height: 0; }
+.network-workspace.is-expanded .gis-map-wrap { min-height: 0; height: 100%; }
+.network-workspace.is-expanded .gis-side { max-height: none; height: 100%; }
+body.map-expanded-lock { overflow: hidden; }
+
+/* Leqend simvolları */
+.lg-dot.station-connected { width: 9px; height: 9px; background: #e0f2fe; border: 1.5px solid #0f172a; }
+.lg-dot.station-disconnected { width: 9px; height: 9px; background: #f97316; border: 1.5px solid #0f172a; }
+.lg-dot.station-newly { width: 9px; height: 9px; background: #4ade80; border: 1.5px solid #0f172a; }
+.lg-dot.selected { width: 11px; height: 11px; background: #facc15; border: 1.5px solid #0f172a; display: inline-block; border-radius: 50%; }
+.lg-ring { width: 14px; height: 14px; border-radius: 50%; display: inline-block; border: 1.5px solid #16a34a; background: rgba(22, 163, 74, .15); }
+.lg-overlap { width: 14px; height: 10px; border-radius: 5px; display: inline-block; background: rgba(245, 158, 11, .55); border: 1px solid #f59e0b; }
+.lg-line.backbone { background: #0f172a; height: 4px; }
+.lg-line.spoke { background: repeating-linear-gradient(90deg, #0284c7 0 4px, transparent 4px 7px); }
+.hub-members ul li { display: flex; align-items: center; gap: 7px; }
+.hub-members .lg-line { width: 16px; }
+.hub-members > small { display: block; margin-top: 8px; font-size: 10.5px; line-height: 1.45; }
+
+@media (max-width: 840px) {
+  .network-toolbar .map-legend { flex-basis: 100%; }
+  .network-workspace.is-expanded .gis-layout { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) auto; }
+  .network-workspace.is-expanded .gis-side { height: auto; max-height: 34vh; }
+  .network-workspace.is-expanded .gis-side:has(.hub-details.empty) { display: none; }
+  .network-workspace.is-expanded .map-footer { display: none; }
+  .network-workspace.is-expanded .network-toolbar { flex-wrap: nowrap; flex-direction: column; align-items: stretch; gap: 8px; padding: 10px 12px; }
+  .network-workspace.is-expanded .network-toolbar .map-legend { flex: none; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
+  .network-workspace.is-expanded .map-layer-toggle { flex: 0 0 auto; white-space: nowrap; }
+  .network-workspace.is-expanded .gis-legend { display: none; }
+}

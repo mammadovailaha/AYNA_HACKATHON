@@ -62,6 +62,35 @@ check('Heatmap nöqtələri yalnız real hub koordinatlarıdır', heat.point_cou
 const stationsHeat = (await getJson('/hubs/heatmap?metric=stations')).body.data
 check('Məntəqə heatmap-ı 831 məntəqədən qurulur', stationsHeat.point_count === 831, `(${stationsHeat.point_count})`)
 
+console.log('\n4b. HUB şəbəkəsi (ulduz, radius, kəsişmə, hub-a aid elementlər)')
+const netRes = await getJson('/hubs/network')
+check('GET /hubs/network → 200 JSON', netRes.status === 200 && netRes.body?.success === true)
+const net = netRes.body.data
+const R = net.config.coverage_radius_m
+const hav = ([lng1, lat1], [lng2, lat2]) => {
+  const rad = Math.PI / 180
+  const h = Math.sin(((lat2 - lat1) * rad) / 2) ** 2 + Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.sin(((lng2 - lng1) * rad) / 2) ** 2
+  return 2 * 6371008.8 * Math.asin(Math.sqrt(h))
+}
+const pos = new Map(hubs.hubs.filter((h) => h.coordinates).map((h) => [h.id, [h.coordinates.lng, h.coordinates.lat]]))
+check('Əlaqə xətlərinin uc nöqtələri real hub koordinatlarıdır', net.links.features.every((f) => {
+  const [a, b] = f.geometry.coordinates
+  return a[0] === pos.get(f.properties.from)[0] && a[1] === pos.get(f.properties.from)[1] && b[0] === pos.get(f.properties.to)[0] && b[1] === pos.get(f.properties.to)[1]
+}))
+check('Əlaqə məsafələri koordinatlardan təkrar hesablananla eynidir (±1 m)', net.links.features.every((f) => Math.abs(hav(pos.get(f.properties.from), pos.get(f.properties.to)) - f.properties.distance_m) <= 1))
+check(`Spoke əlaqələri ≤ ${net.config.link_max_m} m, kənarda qalanlar > limit`, net.links.features.filter((f) => f.properties.type === 'spoke').every((f) => f.properties.distance_m <= net.config.link_max_m) && net.unlinked.every((u) => u.nearest_central_m > net.config.link_max_m))
+check('Magistral = mərkəzi hub sayı − 1 (ağac)', net.counts.backbone_links === net.counts.central - 1)
+check(`Radius dairələri hub mərkəzindən ${R} m-dədir (±1%)`, net.circles.features.every((f) => f.geometry.coordinates[0].every((p) => Math.abs(hav(p, pos.get(f.properties.id)) - R) <= R * 0.01)))
+let pairs = 0
+const ids = [...pos.keys()]
+for (let i = 0; i < ids.length; i += 1) for (let j = i + 1; j < ids.length; j += 1) if (hav(pos.get(ids[i]), pos.get(ids[j])) < 2 * R) pairs += 1
+check(`Ortaq əhatə zonaları yalnız < ${2 * R} m məsafəli cütlərdir (${pairs})`, net.overlaps.features.length === pairs && net.overlaps.features.every((f) => f.properties.distance_m < 2 * R))
+const stationPts = new Map((await getJson('/hubs/heatmap?metric=stations')).body.data.geojson.features.map((f) => [f.properties.id, f.geometry.coordinates]))
+const h19 = net.members.H19
+const h19Expected = [...stationPts].filter(([, p]) => hav(p, pos.get('H19')) <= R).map(([id]) => id).sort()
+check('H19 məntəqələri dəqiq radius daxilindəkilərdir (artıq/əskik yoxdur)', JSON.stringify([...h19.stations].sort()) === JSON.stringify(h19Expected), `(${h19.stations.length} vs ${h19Expected.length})`)
+check('Əvvəlki /hubs/:id endpoint dəyişməyib', (await getJson('/hubs/H19')).body.data.nearby_infrastructure.stations_within_300m >= 0)
+
 console.log('\n5. Real-time: data faylı dəyişir → SSE push → API yenilənir')
 const original = readFileSync(infraPath, 'utf8')
 const controller = new AbortController()

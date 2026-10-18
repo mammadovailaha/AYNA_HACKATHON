@@ -1,0 +1,10 @@
+{
+  "coverage_radius_m": 500,
+  "coverage_radius_source": "hubs.csv · \"500 m-də ≈ N sakin\" — layihənin hub əhatə radiusu (pop sütunu bu radiusla hesablanıb)",
+  "central_status": "proposed",
+  "backbone_rule": "Mərkəzi (təklif edilən) hub-lar minimal örtücü ağac (MST) ilə birləşdirilir — ən qısa ümumi məsafə",
+  "link_max_m": 3000,
+  "link_rule": "Digər hub ən yaxın mərkəzi hub-a, məsafə ≤ 3 km olduqda bağlanır (≈12 dəq velosiped; datada 3.0 → 3.8 km təbii boşluq var)",
+  "member_rule": "Hub radiusu daxilində koordinatı olan mikromobillik məntəqələri və radiusu kəsən velo zolaq seqmentləri hub-a aid edilir",
+  "distance_method": "Haversine (WGS84 sferik), koordinatlar datasetdən"
+}

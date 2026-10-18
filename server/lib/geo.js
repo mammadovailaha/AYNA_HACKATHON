@@ -28,6 +28,21 @@ export function pointToLineM(point, line) {
   return best
 }
 
+// Mərkəzdən verilmiş məsafə və istiqamətdə nöqtə (sferik)
+export function destination([lng, lat], distanceM, bearingDeg) {
+  const d = distanceM / EARTH_RADIUS_M
+  const b = bearingDeg * RAD
+  const p1 = lat * RAD
+  const p2 = Math.asin(Math.sin(p1) * Math.cos(d) + Math.cos(p1) * Math.sin(d) * Math.cos(b))
+  const l2 = lng * RAD + Math.atan2(Math.sin(b) * Math.sin(d) * Math.cos(p1), Math.cos(d) - Math.sin(p1) * Math.sin(p2))
+  return [Number((l2 / RAD).toFixed(6)), Number((p2 / RAD).toFixed(6))]
+}
+
+export const circleRing = (center, radiusM, steps = 64) => {
+  const ring = Array.from({ length: steps }, (_, i) => destination(center, radiusM, (360 / steps) * i))
+  return [...ring, ring[0]]
+}
+
 export const lineLengthKm = (line) => line.slice(1).reduce((sum, point, i) => sum + haversineM(line[i], point), 0) / 1000
 
 // WGS84 ellipsoidi üzrə uzunluq: hər qısa seqment üçün meridian (M) və birinci şaquli (N) radiusları.

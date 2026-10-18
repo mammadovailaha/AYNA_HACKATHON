@@ -8,7 +8,7 @@ const STATUS_LABELS = { proposed: 'Təklif edilən hub', candidate: 'Hub namizə
 const STATION_LABELS = { connected: 'şəbəkəyə bağlı', newly_connected: 'yeni qoşulan', disconnected: 'əlaqəsiz' }
 
 // Hub məlumatı /api/hubs/{id} endpoint-indən oxunur; data versiyası dəyişəndə yenidən yüklənir.
-export default function HubDetails({ hubId, version, onClose }) {
+export default function HubDetails({ hubId, version, members, radiusM, onClose }) {
   const [state, setState] = useState({ hub: null, loading: false, error: '' })
 
   useEffect(() => {
@@ -39,6 +39,17 @@ export default function HubDetails({ hubId, version, onClose }) {
       <div><dt>Koordinat mənbəyi</dt><dd>{hub.coordinate_source ?? '—'}</dd></div>
       <div><dt>Yerləşmə sahəsi</dt><dd>{hub.site ? `${hub.site.type} · ${fmt(hub.site.area_m2)} m² · ${fmt(hub.site.distance_m)} m` : '—'}</dd></div>
     </dl>
+    {members && <div className="hub-block hub-members">
+      <h4><Icon name="layers" size={15} /> Hub-a aid elementlər ({fmt(radiusM)} m radius)</h4>
+      <ul>
+        <li><i className="lg-dot selected" /> Mikromobillik məntəqəsi: <b>{members.stations.length}</b></li>
+        <li><i className="lg-line existing" /> Mövcud zolaq seqmenti: <b>{members.existing_lanes.length}</b></li>
+        <li><i className="lg-line planned" /> Planlaşdırılan seqment: <b>{members.planned_lanes.length}</b>{members.planned_lanes.length > 0 && <small> ({members.planned_lanes.join(', ')})</small>}</li>
+        <li><i className="lg-line backbone" /> Şəbəkə əlaqəsi: <b>{members.links.length}</b></li>
+        <li><i className="lg-overlap" /> Ortaq əhatə: <b>{members.overlaps_with.length ? members.overlaps_with.join(', ') : 'yoxdur'}</b></li>
+      </ul>
+      <small className="muted-text">Qayda: koordinatı radius daxilində olan məntəqələr və radiusu kəsən seqmentlər. Xəritədə sarı ilə vurğulanır.</small>
+    </div>}
     <div className="hub-block">
       <h4><Icon name="bike" size={15} /> Yaxın velosiped infrastrukturu</h4>
       {near ? <ul>

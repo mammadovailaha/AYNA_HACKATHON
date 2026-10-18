@@ -23,6 +23,7 @@ const SOURCES = {
   stations: { path: resolve(serverData, 'stations.geojson'), type: 'json' },
   hubCoordinates: { path: resolve(serverData, 'hub-coordinates.json'), type: 'json' },
   hubGeo: { path: resolve(serverData, 'hubs.geojson'), type: 'json' },
+  hubNetwork: { path: resolve(serverData, 'hub-network.json'), type: 'json' },
   summary: { path: resolve(processed, 'summary.json'), type: 'json' },
   connections: { path: resolve(processed, 'connections.csv'), type: 'csv' },
   hubs: { path: resolve(processed, 'hubs.csv'), type: 'csv' },
@@ -41,6 +42,10 @@ function validate(data) {
   }
   if (infra.baseline_source !== undefined && !['declared', 'measured'].includes(infra.baseline_source)) {
     throw new DataValidationError('infrastructure.json: "baseline_source" "declared" və ya "measured" olmalıdır')
+  }
+  for (const key of ['coverage_radius_m', 'link_max_m']) {
+    const value = data.hubNetwork?.[key]
+    if (typeof value !== 'number' || !(value > 0)) throw new DataValidationError(`hub-network.json: "${key}" müsbət rəqəm olmalıdır`)
   }
   if (infra.existing_km === 0) throw new DataValidationError('infrastructure.json: "existing_km" sıfır ola bilməz (artım faizi hesablanmır)')
   for (const key of ['lanesExisting', 'lanesPlanned', 'stations', 'hubGeo']) {
