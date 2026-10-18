@@ -1,6 +1,7 @@
 import React from 'react'
 import Icon from './Icon'
 import { useLiveDashboard } from '../hooks/useLiveDashboard'
+import { Mark, SearchCard } from './Search'
 
 export const fmt = (value, digits = 0) => Number(value || 0).toLocaleString('az-AZ', { maximumFractionDigits: digits, minimumFractionDigits: digits })
 const km = (value) => `${fmt(value, 1)} km`
@@ -18,26 +19,26 @@ export function VerificationBadge({ check, label }) {
 export function InfrastructureCards({ infra }) {
   const sourceLabel = infra.baseline_source === 'measured' ? 'ölçülmüş' : 'bəyan edilmiş'
   return <div className="infra-cards">
-    <article className="infra-card total">
+    <SearchCard className="infra-card total" title="Mövcud velosiped infrastrukturu">
       <div className="infra-card-top"><span className="infra-icon blue"><Icon name="route" size={20} /></span><span className="infra-tag built">Tikilib</span></div>
-      <span className="infra-label">Mövcud velosiped infrastrukturu <small>({sourceLabel})</small></span>
+      <span className="infra-label"><Mark text="Mövcud velosiped infrastrukturu" /> <small>({sourceLabel})</small></span>
       <strong className="infra-value">{km(infra.existing_km)}</strong>
       <VerificationBadge check={infra.verification?.existing} label="Mövcud" />
       <div className="infra-split">
         <div><span>Planlaşdırılan ümumi uzunluq</span><b>{km(infra.projected_total_km)}</b></div>
         <div><span>Hesablama</span><b>{fmt(infra.existing_km, 1)} + {fmt(infra.planned_addition_km, 1)}</b></div>
       </div>
-    </article>
-    <article className="infra-card growth">
+    </SearchCard>
+    <SearchCard className="infra-card growth" title="Yeni əlavə ediləcək hissə">
       <div className="infra-card-top"><span className="infra-icon green"><Icon name="arrowUp" size={20} /></span><span className="infra-tag planned">Planlaşdırılır</span></div>
-      <span className="infra-label">Yeni əlavə ediləcək hissə</span>
+      <span className="infra-label"><Mark text="Yeni əlavə ediləcək hissə" /></span>
       <strong className="infra-value green">+{km(infra.planned_addition_km)}</strong>
       <VerificationBadge check={infra.verification?.planned} label="Planlaşdırılan" />
       <div className="infra-split">
         <div><span>İnfrastruktur artımı</span><b className="green">{fmt(infra.growth_pct, 2)}%</b></div>
         <div><span>Hesablama</span><b>{fmt(infra.planned_addition_km, 1)} / {fmt(infra.existing_km, 1)} × 100</b></div>
       </div>
-    </article>
+    </SearchCard>
   </div>
 }
 

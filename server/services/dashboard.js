@@ -118,7 +118,7 @@ function buildModel(data) {
       coordinateSource = 'hubs.geojson · layihənin GIS emalı (xəritə, OSM metro və dayanacaq koordinatları ilə yoxlanılıb)'
     } else if (fromMap) {
       coordinates = { lat: fromMap.lat, lng: fromMap.lng }
-      coordinateSource = 'xerite_after.html · "Optimal hablar" qatı'
+      coordinateSource = 'xerite_after.html · "Optimal hub-lar" qatı'
     } else if (fromName) {
       coordinates = { lat: Number(fromName[1]), lng: Number(fromName[2]) }
       coordinateSource = 'hubs.csv · dayanacaq adındakı koordinat (4 onluq, ≈10 m)'
@@ -281,7 +281,7 @@ export function hubList(model, { status, hasCoordinates }) {
 export const hubById = (model, id) => model.hubs.find((hub) => hub.id.toLowerCase() === id.toLowerCase()) ?? null
 
 export const HEATMAP_METRICS = {
-  hubs: 'Hub sıxlığı · çəki = avtobus xətti sayı / maksimum (yalnız koordinatı olan hablar)',
+  hubs: 'Hub sıxlığı · çəki = avtobus xətti sayı / maksimum (yalnız koordinatı olan hub-lar)',
   stations: 'Mikromobillik məntəqə sıxlığı · hər məntəqə çəkisi 1'
 }
 

@@ -1,4 +1,4 @@
-/* AXIN · Light theme (ağ fon, göy əsas rəng, yaşıl mikromobillik indikatorları)
+/* ROUTORA · Light theme (ağ fon, göy əsas rəng, yaşıl mikromobillik indikatorları)
    styles.css üzərinə yazılır; yeni GIS / infrastruktur komponentlərinin stilləri də buradadır. */
 
 :root {
@@ -16,7 +16,7 @@ body { background: #f6f8fc; -webkit-font-smoothing: antialiased; }
 /* Sidebar → ağ */
 .sidebar { background: #fff; color: #475569; border-right: 1px solid var(--line); }
 .brand { color: var(--ink); }
-.brand-mark { background: linear-gradient(145deg, #3b8bff, var(--blue-600)); box-shadow: 0 8px 20px rgba(29, 111, 232, .28); }
+
 .brand span { color: #8a97ab; }
 .sidebar-toggle, .close-sidebar { color: #8a97ab; }
 .sidebar-toggle:hover { color: var(--ink); background: #f1f5fb; }
@@ -66,8 +66,8 @@ body { background: #f6f8fc; -webkit-font-smoothing: antialiased; }
 .network-core strong { color: var(--ink); }
 .network-core span { color: #64748b; }
 .node { border-color: var(--blue-600); background: #fff; box-shadow: 0 0 10px rgba(29, 111, 232, .4); }
-.finance-hero { color: var(--ink); background: linear-gradient(110deg, #ffffff, #eef5ff); border: 1px solid #dfe8f6; }
-.finance-hero p, .finance-hero-stats span { color: #5b6880; }
+
+
 
 /* Real-time status */
 .rt-pill { display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 10px; border-radius: 999px; font-size: 11px; font-weight: 600; white-space: nowrap; border: 1px solid transparent; }
@@ -298,4 +298,87 @@ body.map-expanded-lock { overflow: hidden; }
   .network-workspace.is-expanded .network-toolbar .map-legend { flex: none; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
   .network-workspace.is-expanded .map-layer-toggle { flex: 0 0 auto; white-space: nowrap; }
   .network-workspace.is-expanded .gis-legend { display: none; }
+}
+
+/* Brend: rəsmi loqo üçün ayrılmış boş sahə (ölçü sabitdir, məzmun yoxdur) */
+.brand-logo-slot { width: 31px; height: 31px; flex: 0 0 31px; }
+
+/* Dashboard axtarışı */
+.top-search { position: relative; width: 260px; color: #94a3b8; transition: border-color .15s ease, box-shadow .15s ease; }
+.top-search:focus-within { border-color: var(--blue-600); box-shadow: 0 0 0 3px rgba(29, 111, 232, .12); background: #fff; }
+.top-search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--ink); font-size: 12px; }
+.top-search input::placeholder { color: #94a3b8; }
+.top-search input::-webkit-search-cancel-button { display: none; }
+.search-clear { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 6px; background: #eef2f8; color: #64748b; }
+.search-status { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 30; padding: 8px 10px; border-radius: 9px; background: #fff; border: 1px solid var(--line); box-shadow: var(--shadow-md); color: #334155; font-size: 11.5px; font-weight: 600; }
+.search-status.empty { color: #9a5a00; background: var(--amber-50); border-color: #fde7b0; }
+mark.search-mark { padding: 0 2px; border-radius: 3px; background: #fde68a; color: inherit; }
+.search-hit { outline: 2px solid var(--blue-600); outline-offset: 2px; box-shadow: 0 10px 28px rgba(29, 111, 232, .14) !important; transition: opacity .15s ease, outline-color .15s ease; }
+.search-dim { opacity: .32; transition: opacity .15s ease; }
+
+/* Banner kateqoriyaları — xəritəyə keçid düymələri */
+button.mode-chip { cursor: pointer; font: inherit; font-size: 14px; transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease; }
+button.mode-chip:hover, button.mode-chip:focus-visible { border-color: var(--blue-600) !important; box-shadow: 0 4px 12px rgba(29, 111, 232, .15); outline: none; }
+.mode-chip.chip-bus .icon { color: var(--blue-600); }
+.mode-chip.chip-hub .icon { color: var(--green-600); }
+.mode-chip.chip-bike .icon { color: #0ea5e9; }
+.mode-chip.chip-lastmile .icon { color: var(--amber-600); }
+.preset-note { flex-basis: 100%; display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 9px; background: var(--blue-50); color: var(--blue-700); font-size: 12px; font-weight: 600; }
+.preset-note button { margin-left: auto; padding: 4px 10px; border-radius: 7px; background: #fff; color: var(--blue-700); font-size: 11px; font-weight: 700; border: 1px solid #cfe0fb; }
+
+/* Xəritənin sol hub paneli + detallar çekməcəsi */
+.gis-layout.with-list { grid-template-columns: 250px minmax(0, 1fr); }
+.gis-hub-list { border-right: 1px solid var(--line); background: #fff; min-height: 0; }
+.hub-list-panel { display: flex; flex-direction: column; height: 600px; }
+.network-workspace.is-expanded .hub-list-panel { height: 100%; }
+.hub-list-panel.state { align-items: center; justify-content: center; gap: 10px; padding: 20px; text-align: center; color: #64748b; font-size: 12px; }
+.hub-list-panel.state.error { color: #b42318; }
+.hub-list-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 12px 8px; }
+.hub-list-head b { color: var(--ink); font-size: 13px; }
+.hub-list-head b span { margin-left: 4px; color: #64748b; font: 600 11px 'DM Mono', monospace; }
+.hub-list-actions { display: flex; gap: 4px; }
+.hub-list-actions button { padding: 3px 7px; border-radius: 6px; background: #f1f5fb; color: #475569; font-size: 10.5px; font-weight: 600; }
+.hub-list-actions button:hover { color: var(--blue-700); }
+.hub-list-filter { margin: 0 12px 8px; padding: 7px 9px; border: 1px solid var(--line); border-radius: 8px; font-size: 12px; outline: none; }
+.hub-list-filter:focus { border-color: var(--blue-600); }
+.hub-list-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 0 6px 10px; }
+.hub-list-group > small { display: block; padding: 8px 6px 4px; color: #94a3b8; font: 500 10px 'DM Mono', monospace; letter-spacing: .08em; text-transform: uppercase; }
+.hub-list-empty { padding: 12px; color: #94a3b8; font-size: 12px; }
+.hub-list-item { display: flex; align-items: center; gap: 4px; border-radius: 8px; }
+.hub-list-item:hover { background: #f6f8fc; }
+.hub-list-item.selected { background: #fef9c3; }
+.hub-list-item.disabled { opacity: .5; }
+.hub-list-item label { display: flex; align-items: center; gap: 6px; padding: 6px 0 6px 6px; cursor: pointer; }
+.hub-list-item input { width: 15px; height: 15px; accent-color: var(--blue-600); cursor: pointer; }
+.hub-dot { display: grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px #cbd5e1; font: 700 8.5px 'Inter', sans-serif; color: #fff; }
+.hub-dot.proposed { background: var(--green-600); }
+.hub-dot.candidate { width: 11px; height: 11px; background: var(--blue-600); }
+.hub-dot.existing { background: #3730a3; }
+.hub-list-name { flex: 1; min-width: 0; display: grid; padding: 5px 6px 5px 2px; background: transparent; text-align: left; }
+.hub-list-name span { overflow: hidden; color: #334155; font-size: 12px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.hub-list-name small { color: #94a3b8; font: 10px 'DM Mono', monospace; }
+.hub-list-name:hover span { color: var(--blue-700); }
+.hub-drawer { position: absolute; top: 12px; right: 56px; bottom: 12px; z-index: 3; width: 340px; overflow-y: auto; border-radius: 14px; background: #fff; border: 1px solid var(--line); box-shadow: var(--shadow-md); }
+
+@media (max-width: 1180px) {
+  .gis-layout.with-list { grid-template-columns: 220px minmax(0, 1fr); }
+  .hub-drawer { width: 300px; }
+}
+@media (max-width: 840px) {
+  .gis-layout.with-list { grid-template-columns: 1fr; }
+  .gis-hub-list { border-right: 0; border-bottom: 1px solid var(--line); }
+  .hub-list-panel { height: 230px; }
+  .hub-drawer { position: static; width: auto; max-height: none; border-radius: 0; border: 0; border-top: 1px solid var(--line); box-shadow: none; }
+  .gis-map-wrap { display: flex; flex-direction: column; }
+  .gis-map-wrap > .gis-map { position: relative; height: 460px; flex: none; }
+  .network-workspace.is-expanded .gis-hub-list { display: none; }
+}
+@media (max-width: 560px) {
+  .breadcrumb { display: none; }
+  .top-actions { flex: 1; justify-content: flex-end; }
+  .top-search { display: flex; width: auto; flex: 1; max-width: 260px; }
+  .top-search kbd { display: none; }
+}
+@media (max-width: 840px) {
+  .network-workspace.is-expanded .gis-map-wrap > .gis-map { height: auto; flex: 1; min-height: 0; }
 }

@@ -21,7 +21,7 @@ export default function HubDetails({ hubId, version, members, radiusM, onClose }
     return () => { cancelled = true }
   }, [hubId, version])
 
-  if (!hubId) return <div className="hub-details empty"><Icon name="pin" size={26} /><b>Hub seçin</b><p>Xəritədəki istənilən hub markerinə klik edin — ünvan, koordinat, nəqliyyat əlaqələri və prioritet burada görünəcək.</p></div>
+  if (!hubId) return null
   if (state.loading && !state.hub) return <div className="hub-details empty"><div className="loader" /><p>Hub məlumatı yüklənir…</p></div>
   if (state.error) return <div className="hub-details empty error"><Icon name="alert" size={24} /><b>Hub yüklənmədi</b><p>{state.error}</p></div>
   const hub = state.hub

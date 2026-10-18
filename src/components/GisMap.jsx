@@ -101,7 +101,7 @@ function addLayers(map) {
   map.addLayer({ id: 'hubs-label', type: 'symbol', source: 'hubs', filter: ['==', ['get', 'status'], 'proposed'], layout: { 'text-field': ['to-string', ['get', 'rank']], 'text-size': 11, 'text-font': ['Open Sans Bold'], 'text-allow-overlap': true }, paint: { 'text-color': '#ffffff' } })
 }
 
-export default function GisMap({ data, layers, basemap = 'satellite', scenarioActive = true, selectedHubId, selectedMembers, onSelectHub }) {
+export default function GisMap({ data, layers, basemap = 'satellite', scenarioActive = true, selectedHubId, selectedMembers, onSelectHub, focus }) {
   const container = useRef(null)
   const mapRef = useRef(null)
   const [ready, setReady] = useState(0) // hər stil yüklənməsində artır → data və qatlar yenidən tətbiq olunur
@@ -176,6 +176,17 @@ export default function GisMap({ data, layers, basemap = 'satellite', scenarioAc
     if (!ready || !map) return
     Object.entries(LAYER_GROUPS).forEach(([group, ids]) => ids.forEach((id) => map.getLayer(id) && map.setLayoutProperty(id, 'visibility', layers[group] ? 'visible' : 'none')))
   }, [ready, layers])
+
+  // Banner kateqoriyası: xəritə uyğun obyektlərə fokuslanır
+  useEffect(() => {
+    const map = mapRef.current
+    if (!ready || !map || !focus) return
+    const hubsOf = (status) => data.hubs && { ...data.hubs, features: data.hubs.features.filter((f) => !status || f.properties.status === status) }
+    const targets = { hubs: [hubsOf()], central: [hubsOf('proposed')], lanes: [data.existing, data.planned], planned: [data.planned] }[focus.target] ?? []
+    const bounds = boundsOf(targets)
+    if (bounds) map.fitBounds(bounds, { padding: 60, maxZoom: 14.5, duration: 800 })
+    fitted.current = true
+  }, [ready, focus?.nonce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Əlaqə xətləri peyk üzərində açıq, küçə xəritəsində tünd rəngdə — hər iki fonda oxunaqlı
   useEffect(() => {

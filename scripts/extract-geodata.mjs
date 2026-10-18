@@ -80,7 +80,7 @@ stations.forEach((feature, index) => { feature.properties.id = `M${String(index 
 // 4. Optimal hablar — koordinat və ad mənbə xəritənin popup-ından
 const hubPoints = items.filter((i) => i.type === 'circleMarker' && i.group === groupOf('Optimal hablar')).map((item) => {
   const title = tooltips[item.id] ?? ''
-  const match = title.match(/Hab (\d+):\s*(.+)/)
+  const match = title.match(/H[au]b (\d+):\s*(.+)/)
   return { rank: Number(match?.[1]), name: match?.[2]?.trim(), lat: item.coords[0], lng: item.coords[1], popup: stripTags(popupHtml[popups[item.id]]) }
 })
 

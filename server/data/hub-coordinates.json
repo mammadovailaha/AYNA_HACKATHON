@@ -1,47 +1,47 @@
 {
- "source": "public/processed/xerite_after.html · \"Optimal hablar\"",
+ "source": "public/processed/xerite_after.html · \"Optimal hub-lar\"",
  "hubs": [
   {
    "rank": 4,
    "name": "Bakı Beynəlxalq Avtovağzal Kompleksi",
    "lat": 40.41738,
    "lng": 49.7986,
-   "popup": "Hab 4: Bakı Beynəlxalq Avtovağzal Kompleksi · 45 avtobus xətti · 45 avtobus xətti 300 m-də; 500 m-də ≈4 239 sakin; yer: avtomobil parkinqi (596 m² 68 m) · Təxmini xərc: 6 000 ₼"
+   "popup": "Hub 4: Bakı Beynəlxalq Avtovağzal Kompleksi · 45 avtobus xətti · 45 avtobus xətti 300 m-də; 500 m-də ≈4 239 sakin; yer: avtomobil parkinqi (596 m² 68 m) · Təxmini xərc: 6 000 ₼"
   },
   {
    "rank": 5,
    "name": "Elmlər Akademiyası metro",
    "lat": 40.37515,
    "lng": 49.81548,
-   "popup": "Hab 5: Elmlər Akademiyası metro · 12 avtobus xətti · 12 avtobus xətti 300 m-də; Elmlər Akademiyası metrosu 0 m-də; 10 mövcud məntəqə inteqrasiya olunur; 500 m-də ≈11 097 sakin; yer: boş / tikinti sahəsi (4319 m² 24 m) · Təxmini xərc: 11 000 ₼"
+   "popup": "Hub 5: Elmlər Akademiyası metro · 12 avtobus xətti · 12 avtobus xətti 300 m-də; Elmlər Akademiyası metrosu 0 m-də; 10 mövcud məntəqə inteqrasiya olunur; 500 m-də ≈11 097 sakin; yer: boş / tikinti sahəsi (4319 m² 24 m) · Təxmini xərc: 11 000 ₼"
   },
   {
    "rank": 2,
    "name": "20 Yanvar metro",
    "lat": 40.40414,
    "lng": 49.8077,
-   "popup": "Hab 2: 20 Yanvar metro · 38 avtobus xətti · 38 avtobus xətti 300 m-də; 20 Yanvar metrosu 0 m-də; 2 mövcud məntəqə inteqrasiya olunur; 500 m-də ≈13 877 sakin; yer: avtomobil parkinqi (1707 m² 79 m) · Təxmini xərc: 7 000 ₼"
+   "popup": "Hub 2: 20 Yanvar metro · 38 avtobus xətti · 38 avtobus xətti 300 m-də; 20 Yanvar metrosu 0 m-də; 2 mövcud məntəqə inteqrasiya olunur; 500 m-də ≈13 877 sakin; yer: avtomobil parkinqi (1707 m² 79 m) · Təxmini xərc: 7 000 ₼"
   },
   {
    "rank": 1,
    "name": "Cəfər Cabbarlı metro",
    "lat": 40.37965,
    "lng": 49.84895,
-   "popup": "Hab 1: Cəfər Cabbarlı metro · 34 avtobus xətti · 34 avtobus xətti 300 m-də; Cəfər Cabbarlı metrosu 0 m-də; 11 mövcud məntəqə inteqrasiya olunur; 500 m-də ≈17 352 sakin; yer: yaşıl sahə (92 m² 21 m) · Təxmini xərc: 11 500 ₼"
+   "popup": "Hub 1: Cəfər Cabbarlı metro · 34 avtobus xətti · 34 avtobus xətti 300 m-də; Cəfər Cabbarlı metrosu 0 m-də; 11 mövcud məntəqə inteqrasiya olunur; 500 m-də ≈17 352 sakin; yer: yaşıl sahə (92 m² 21 m) · Təxmini xərc: 11 500 ₼"
   },
   {
    "rank": 6,
    "name": "Memar Əcəmi metro",
    "lat": 40.41068,
    "lng": 49.81394,
-   "popup": "Hab 6: Memar Əcəmi metro · 13 avtobus xətti · 13 avtobus xətti 300 m-də; Memar Əcəmi metrosu 0 m-də; 1 mövcud məntəqə inteqrasiya olunur; 500 m-də ≈15 424 sakin; yer: yaşıl sahə (91 m² 107 m) · Təxmini xərc: 6 500 ₼"
+   "popup": "Hub 6: Memar Əcəmi metro · 13 avtobus xətti · 13 avtobus xətti 300 m-də; Memar Əcəmi metrosu 0 m-də; 1 mövcud məntəqə inteqrasiya olunur; 500 m-də ≈15 424 sakin; yer: yaşıl sahə (91 m² 107 m) · Təxmini xərc: 6 500 ₼"
   },
   {
    "rank": 3,
    "name": "Gənclik metro",
    "lat": 40.39988,
    "lng": 49.85096,
-   "popup": "Hab 3: Gənclik metro · 21 avtobus xətti · 21 avtobus xətti 300 m-də; Gənclik metrosu 0 m-də; 7 mövcud məntəqə inteqrasiya olunur; 500 m-də ≈9 936 sakin; yer: avtomobil parkinqi (11032 m² 69 m) · Təxmini xərc: 9 500 ₼"
+   "popup": "Hub 3: Gənclik metro · 21 avtobus xətti · 21 avtobus xətti 300 m-də; Gənclik metrosu 0 m-də; 7 mövcud məntəqə inteqrasiya olunur; 500 m-də ≈9 936 sakin; yer: avtomobil parkinqi (11032 m² 69 m) · Təxmini xərc: 9 500 ₼"
   }
  ]
 }

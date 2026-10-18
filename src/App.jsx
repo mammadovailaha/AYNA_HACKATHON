@@ -1,20 +1,31 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Icon from './components/Icon'
 import { AreaChart, Bars, DonutChart } from './components/Charts'
-import { EmptyState, MetricCard, Panel, PanelHeader, SectionHeader, StatusBadge } from './components/Ui'
+import { MetricCard, Panel, PanelHeader, SectionHeader, StatusBadge } from './components/Ui'
 import { useDashboardData } from './hooks/useDashboardData'
 import { useLiveDashboard } from './hooks/useLiveDashboard'
 import NetworkMap from './components/NetworkMap'
 import { ComparisonTable, InfrastructureCards, InfrastructureGrowthChart, LaneRecalculation, RealtimeStatus, VerificationBadge } from './components/Infrastructure'
+import { Mark, SearchCard, SearchProvider } from './components/Search'
+
+const BRAND = 'ROUTORA'
 
 const navItems = [
   { id: 'overview', label: 'Vahid mərkəz', icon: 'grid' },
   { id: 'map', label: 'Hub xəritəsi', icon: 'map' },
   { id: 'before-after', label: 'Şəbəkə ssenarisi', icon: 'chart' },
   { id: 'connections', label: 'Last-mile bağlantılar', icon: 'route' },
-  { id: 'hubs', label: 'Mobility hub-lar', icon: 'pin' },
-  { id: 'finance', label: 'İcra və maliyyə', icon: 'wallet' }
+  { id: 'hubs', label: 'Mobility hub-lar', icon: 'pin' }
 ]
+
+// Banner kateqoriyaları → Hub xəritəsində qat dəsti və fokus (data API-dən gəlir)
+const MAP_CATEGORIES = {
+  bus: { label: 'Avtobus', icon: 'route', layers: { hubs: true, heatmap: true }, heatMetric: 'hubs', focus: 'hubs', note: 'Avtobus: hub-lar və avtobus xətti sayı ilə çəkilmiş hub sıxlığı' },
+  hub: { label: 'Mobility hub', icon: 'pin', layers: { hubs: true, links: true, radius: true }, focus: 'central', note: 'Mobility hub: mərkəzi hub-lar, əlaqələr və 500 m əhatə radiusları' },
+  bike: { label: 'Velosiped', icon: 'bike', layers: { existing: true, planned: true }, focus: 'lanes', note: 'Velosiped: mövcud və planlaşdırılan velo zolaqları' },
+  lastmile: { label: 'Last-mile', icon: 'map', layers: { planned: true, stations: true }, focus: 'planned', note: 'Last-mile: planlaşdırılan bağlantılar və mikromobillik məntəqələri' }
+}
+const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
 
 const fmt = (value, digits = 0) => Number(value || 0).toLocaleString('az-AZ', { maximumFractionDigits: digits, minimumFractionDigits: digits })
 const money = (value) => `${fmt(value)} ₼`
@@ -44,9 +55,34 @@ function App() {
   const [activeView, setActiveView] = useState('overview')
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const [hits, setHits] = useState(null)
+  const [mapCategory, setMapCategory] = useState(null)
+  const searchInput = useRef(null)
 
-  if (loading) return <div className="loading-screen"><div className="loading-mark">AXIN</div><div className="loader" /><p>Dashboard məlumatları hazırlanır…</p></div>
-  if (error || !data) return <div className="loading-screen error-screen"><div className="loading-mark">AXIN</div><h2>Data yüklənmədi</h2><p>{error || 'Naməlum xəta'}</p><small>API serverinin işlədiyinə əmin olun (npm run dev və ya npm start).</small></div>
+  // Axtarış qısayolu: Win/⌘ + K (Windows Win+K-nı sistem üçün tutur), Ctrl + K və "/" alternativdir
+  useEffect(() => {
+    const onKey = (event) => {
+      const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName) || event.target.isContentEditable
+      if (((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') || (event.key === '/' && !typing)) {
+        event.preventDefault()
+        searchInput.current?.focus()
+        searchInput.current?.select()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
+  // Uyğun gələn kartların sayı render-dən sonra ölçülür ("Nəticə tapılmadı" mesajı üçün)
+  useEffect(() => {
+    if (!query.trim()) { setHits(null); return undefined }
+    const frame = requestAnimationFrame(() => setHits(document.querySelectorAll('.content-wrap .search-hit').length))
+    return () => cancelAnimationFrame(frame)
+  }, [query, activeView, data])
+
+  if (loading) return <div className="loading-screen"><div className="loading-mark">{BRAND}</div><div className="loader" /><p>Dashboard məlumatları hazırlanır…</p></div>
+  if (error || !data) return <div className="loading-screen error-screen"><div className="loading-mark">{BRAND}</div><h2>Data yüklənmədi</h2><p>{error || 'Naməlum xəta'}</p><small>API serverinin işlədiyinə əmin olun (npm run dev və ya npm start).</small></div>
 
   const { summary, connections, hubs, finance } = data
   const viewTitle = navItems.find((item) => item.id === activeView)?.label ?? 'Ümumi baxış'
@@ -54,31 +90,44 @@ function App() {
   const handleNavClick = (viewId) => {
     setActiveView(viewId)
     setSidebarOpen(false)
+    if (viewId === 'map') setMapCategory(null)
   }
+  const openCategory = (key) => {
+    setMapCategory({ key, nonce: Date.now() })
+    setActiveView('map')
+    window.scrollTo({ top: 0 })
+  }
+  const jumpToFirstHit = () => document.querySelector('.content-wrap .search-hit')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
 
   return <div className="app-shell">
     <aside className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${sidebarOpen ? 'open' : ''}`}>
-      <div className="brand"><div className="brand-mark">A</div><div className="brand-copy"><strong>AXIN</strong><span>Mobility hub intelligence</span></div><button className="sidebar-toggle" onClick={() => setSidebarCollapsed((value) => !value)} aria-label={sidebarCollapsed ? 'Sidebarı aç' : 'Sidebarı bağla'} title={sidebarCollapsed ? 'Sidebarı aç' : 'Sidebarı bağla'}><Icon name="chevron" size={17} /></button><button className="close-sidebar" onClick={() => setSidebarOpen(false)} aria-label="Menyunu bağla">×</button></div>
+      <div className="brand"><div className="brand-logo-slot" aria-hidden="true" /><div className="brand-copy"><strong>{BRAND}</strong><span>Mobility hub intelligence</span></div><button className="sidebar-toggle" onClick={() => setSidebarCollapsed((value) => !value)} aria-label={sidebarCollapsed ? 'Sidebarı aç' : 'Sidebarı bağla'} title={sidebarCollapsed ? 'Sidebarı aç' : 'Sidebarı bağla'}><Icon name="chevron" size={17} /></button><button className="close-sidebar" onClick={() => setSidebarOpen(false)} aria-label="Menyunu bağla">×</button></div>
       <div className="workspace-switch"><span className="workspace-dot" /><div><small>VAHİD ŞƏBƏKƏ</small><b>Bakı multimodal sistemi</b></div><Icon name="chevron" size={15} /></div>
       <nav className="main-nav"><span className="nav-caption">İDARƏETMƏ</span>{navItems.map((item) => <button key={item.id} className={activeView === item.id ? 'active' : ''} data-tooltip={item.label} aria-label={item.label} onClick={() => handleNavClick(item.id)}><Icon name={item.icon} size={18} /><span>{item.label}</span>{item.id === 'connections' && <em>{connections.filter((row) => row.selected).length}</em>}</button>)}</nav>
       <div className="sidebar-bottom"><div className="status-card" data-tooltip="Real-time data qatı"><RealtimeStatus compact /></div><div className="user-card" data-tooltip="AYNA qərar mərkəzi"><div className="avatar">AY</div><div><b>AYNA qərar mərkəzi</b><small>İdarəetmə paneli</small></div><Icon name="user" size={20} /></div></div>
     </aside>
     {sidebarOpen && <button className="sidebar-backdrop" aria-label="Menyunu bağla" onClick={() => setSidebarOpen(false)} />}
     <main className="main-content">
-      <header className="topbar"><button className="mobile-menu" onClick={() => setSidebarOpen(true)}><Icon name="grid" size={20} /></button><div className="breadcrumb"><span>AXIN /</span><b>{viewTitle}</b></div><div className="top-actions"><RealtimeStatus compact /><div className="top-search"><Icon name="search" size={16} /><span>Dashboardda axtar…</span><kbd>⌘ K</kbd></div><div className="top-avatar">AY</div></div></header>
-      <div className="content-wrap">
-        {activeView === 'overview' && <Overview summary={summary} connections={connections} hubs={hubs} finance={finance} />}
-        {activeView === 'map' && <MapView />}
+      <header className="topbar"><button className="mobile-menu" onClick={() => setSidebarOpen(true)}><Icon name="grid" size={20} /></button><div className="breadcrumb"><span>{BRAND} /</span><b>{viewTitle}</b></div><div className="top-actions"><RealtimeStatus compact />
+        <div className={`top-search ${query ? 'has-query' : ''}`} role="search">
+          <Icon name="search" size={16} />
+          <input ref={searchInput} type="search" value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => { if (event.key === 'Escape') { setQuery(''); event.currentTarget.blur() } if (event.key === 'Enter') jumpToFirstHit() }} placeholder="Dashboardda axtar…" aria-label="Dashboard kart və diaqram başlıqlarında axtar" title={`Qısayol: ${isMac ? '⌘' : 'Win'} + K · Ctrl + K · /`} />
+          {query ? <button type="button" className="search-clear" onClick={() => { setQuery(''); searchInput.current?.focus() }} aria-label="Axtarışı təmizlə"><Icon name="close" size={13} /></button> : <kbd>{isMac ? '⌘ K' : 'Ctrl K'}</kbd>}
+          {hits !== null && <div className={`search-status ${hits ? '' : 'empty'}`} role="status">{hits ? `${hits} uyğun kart/diaqram · Enter — keç` : 'Nəticə tapılmadı'}</div>}
+        </div>
+        <div className="top-avatar">AY</div></div></header>
+      <SearchProvider query={query}><div className="content-wrap">
+        {activeView === 'overview' && <Overview summary={summary} connections={connections} hubs={hubs} finance={finance} onCategory={openCategory} />}
+        {activeView === 'map' && <MapView category={mapCategory} onClearCategory={() => setMapCategory(null)} />}
         {activeView === 'before-after' && <BeforeAfterView summary={summary} />}
         {activeView === 'connections' && <ConnectionsView connections={connections} />}
         {activeView === 'hubs' && <HubsView hubs={hubs} />}
-        {activeView === 'finance' && <FinanceView summary={summary} finance={finance} />}
-      </div>
+      </div></SearchProvider>
     </main>
   </div>
 }
 
-function Overview({ summary, connections, hubs, finance }) {
+function Overview({ summary, connections, hubs, finance, onCategory }) {
   const live = useLiveDashboard().data
   const infra = live.summary.infrastructure
   const phases = summary.phases
@@ -99,17 +148,16 @@ function Overview({ summary, connections, hubs, finance }) {
     { göstərici: 'Yeni qoşulan məntəqə', dəyər: `+${summary.newly_connected}`, qeyd: 'Məntəqə' }
   ]
   return <>
-    <SectionHeader eyebrow="AYNA · MOBILITY HUB & LAST-MILE" title="Vahid multimodal idarəetmə mərkəzi" description={`Avtobus, metro, velosiped zolaqları və mobility hub-ları ${scenarioYear} ssenarisi ilə bir sistemdə izləyin.`} action={<div className="header-actions"><button className="secondary-button" type="button" onClick={() => downloadCsv('axin-umumi-hesabat.csv', reportRows)}><Icon name="download" size={15} /> Hesabatı yüklə</button><span className="primary-button scenario-status" role="status"><span className="live-dot" /> Ssenari aktivdir</span></div>} />
+    <SectionHeader eyebrow="AYNA · MOBILITY HUB & LAST-MILE" title="Vahid multimodal idarəetmə mərkəzi" description={`Avtobus, metro, velosiped zolaqları və mobility hub-ları ${scenarioYear} ssenarisi ilə bir sistemdə izləyin.`} action={<div className="header-actions"><button className="secondary-button" type="button" onClick={() => downloadCsv('routora-umumi-hesabat.csv', reportRows)}><Icon name="download" size={15} /> Hesabatı yüklə</button></div>} />
     <div className="hero-banner">
       <div className="hero-copy">
         <span className="eyebrow mint">{scenarioYear} · MOBILITY HUB SSENARİSİ</span>
         <h1>Son mili tamamla,<br /><em>şəbəkəni vahid sistemə çevir.</em></h1>
-        <p>AXIN avtobus və metro qovşaqlarını, velo zolaqlarını və mikromobillik məntəqələrini birləşdirərək mövcud {fmt(infra.existing_km, 1)} km şəbəkəni +{fmt(infra.planned_addition_km, 1)} km planlaşdırılan bağlantı ilə {fmt(infra.projected_total_km, 1)} km vahid last-mile sisteminə çevirir.</p>
-        <div className="system-flow" aria-label="Vahid multimodal şəbəkə"><span className="mode-chip"><Icon name="route" size={17} /> Avtobus</span><i>→</i><span className="mode-chip"><Icon name="pin" size={17} /> Mobility hub</span><i>→</i><span className="mode-chip"><Icon name="bike" size={17} /> Velosiped</span><i>→</i><span className="mode-chip"><Icon name="map" size={17} /> Last-mile</span></div>
+        <p>{BRAND} avtobus və metro qovşaqlarını, velo zolaqlarını və mikromobillik məntəqələrini birləşdirərək mövcud {fmt(infra.existing_km, 1)} km şəbəkəni +{fmt(infra.planned_addition_km, 1)} km planlaşdırılan bağlantı ilə {fmt(infra.projected_total_km, 1)} km vahid last-mile sisteminə çevirir.</p>
+        <nav className="system-flow" aria-label="Kateqoriyanı xəritədə aç">{Object.entries(MAP_CATEGORIES).map(([key, cat], index) => <React.Fragment key={key}>{index > 0 && <i aria-hidden="true">→</i>}<button type="button" className={`mode-chip chip-${key}`} onClick={() => onCategory(key)} title={`${cat.note} — xəritədə aç`}><Icon name={cat.icon} size={17} /> {cat.label}</button></React.Fragment>)}</nav>
         <div className="hero-meta">
           <div><b>{money(summary.capex_azn)}</b><span>ümumi kapital xərci</span></div>
           <div><b>{summary.months} ay</b><span>təxmini icra müddəti</span></div>
-          <div><b>+{summary.newly_connected}</b><span>yeni qoşulan məntəqə</span></div>
         </div>
       </div>
       <div className="hero-visual" aria-hidden="true">
@@ -132,7 +180,8 @@ function Overview({ summary, connections, hubs, finance }) {
   </>
 }
 
-function MapView() {
+function MapView({ category, onClearCategory }) {
+  const preset = category ? { ...MAP_CATEGORIES[category.key], key: category.key, nonce: category.nonce } : null
   const live = useLiveDashboard().data
   const { cycling, hubs, hubNetwork } = live
   const unlocated = hubs.hubs.filter((hub) => !hub.coordinates)
@@ -140,7 +189,7 @@ function MapView() {
   const toggles = [
     { key: 'existing', label: 'Mövcud velo yolları', value: `${fmt(cycling.existing.geometry_length_km, 1)} km xəritədə` },
     { key: 'planned', label: 'Planlaşdırılan yollar', value: `+${fmt(cycling.planned.length_km, 1)} km` },
-    { key: 'hubs', label: 'HUB şəbəkəsi', value: `${hubs.counts.with_coordinates} hub` },
+    { key: 'hubs', label: 'HUB şəbəkəsi' },
     { key: 'links', label: 'HUB-lar arası əlaqələr', value: `${hubNetwork.links.features.length} əlaqə` },
     { key: 'radius', label: 'HUB radiusları', value: `${hubNetwork.config.coverage_radius_m} m` },
     { key: 'heatmap', label: 'Sıxlıq heatmap' },
@@ -148,7 +197,7 @@ function MapView() {
   ]
   return <>
     <SectionHeader eyebrow="GIS · HUB ŞƏBƏKƏSİ" title="HUB xəritəsi" description="Peyk görünüşündə mərkəzi hub-lar, ulduz şəbəkəsi əlaqələri, əhatə radiusları və sıxlıq. Hub-a klik edin — ona aid məntəqələr, zolaqlar və əlaqələr vurğulanacaq." action={<div className="header-actions"><button className="secondary-button" type="button" onClick={openMap}><Icon name="external" size={15} /> Əvvəlki xəritə</button></div>} />
-    <NetworkMap title="HUB xəritəsi" toggles={toggles} heatMetricSwitch defaults={{ existing: true, planned: true, hubs: true, links: true, radius: false, heatmap: false, stations: false }} />
+    <NetworkMap key={category ? 'preset' : 'default'} title="HUB xəritəsi" toggles={toggles} heatMetricSwitch preset={preset} onClearPreset={onClearCategory} defaults={{ existing: true, planned: true, hubs: true, links: true, radius: false, heatmap: false, stations: false }} />
     <div className="dashboard-grid gis-notes">
       {unlocated.length > 0
         ? <Panel><PanelHeader title="Koordinatı yoxlanılmalı hub-lar" subtitle={`${unlocated.length} hub-un datasetdə koordinatı yoxdur — xəritədə və heatmap-da göstərilmir`} action={<StatusBadge tone="orange">Yoxlanılmalıdır</StatusBadge>} /><div className="unlocated-list">{unlocated.map((hub) => <span key={hub.id}><b>{hub.id}</b> {hub.name}</span>)}</div></Panel>
@@ -195,7 +244,7 @@ function BeforeAfterView({ summary }) {
   </>
   return <>
     <SectionHeader eyebrow="VƏZİYYƏT → SSENARİ" title="Şəbəkənin vahid sistemə çevrilməsi" description="Mövcud vəziyyət və yeni ssenari eyni xəritədə: əvvəlcə mövcud şəbəkəni görün, sonra hub, radius, əlaqə, heatmap və yeni infrastruktur qatlarını bir-bir aktivləşdirin." action={<StatusBadge tone="mint">+{fmt(infra.addition_km, 1)} km planlaşdırılır · +{fmt(infra.growth_pct, 2)}%</StatusBadge>} />
-    <div className="comparison-grid">{comparison.map((item) => <div className="comparison-stat" key={item.label}><span>{item.label}</span><div><b>{item.before}</b><Icon name="chevron" size={14} /><strong>{item.after}</strong></div></div>)}</div>
+    <div className="comparison-grid">{comparison.map((item) => <SearchCard as="div" className="comparison-stat" title={item.label} key={item.label}><span><Mark text={item.label} /></span><div><b>{item.before}</b><Icon name="chevron" size={14} /><strong>{item.after}</strong></div></SearchCard>)}</div>
     <NetworkMap title="Şəbəkə ssenarisi xəritəsi" toggles={toggles} footer={footer} scenarioKey="planned" defaults={{ existing: true, stations: true, hubs: false, radius: false, links: false, heatmap: false, planned: false }} />
   </>
 }
@@ -204,33 +253,14 @@ function ConnectionsView({ connections }) {
   const [query, setQuery] = useState('')
   const [onlySelected, setOnlySelected] = useState(true)
   const filtered = useMemo(() => connections.filter((row) => (!onlySelected || row.selected) && `${row.id} ${row.name} ${row.from} ${row.to}`.toLowerCase().includes(query.toLowerCase())).sort((a, b) => a.azn_per_benefit - b.azn_per_benefit), [connections, onlySelected, query])
-  return <><SectionHeader eyebrow="LAST-MILE PLANLAŞDIRMA" title="Prioritet last-mile bağlantılar" description="Avtovağzal, metro, avtobus şəbəkəsi və velosiped zolaqları arasındakı son-mil boşluqlarını təsir və xərc üzrə prioritetləşdirin." action={<button className="secondary-button" type="button" onClick={() => downloadCsv('axin-prioritet-baglantilar.csv', filtered)}><Icon name="download" size={15} /> CSV yüklə</button>} /><div className="filter-row"><div className="input-search"><Icon name="search" size={16} /><input placeholder="Hub, istiqamət və ya küçə axtar…" value={query} onChange={(event) => setQuery(event.target.value)} /></div><button type="button" className={`filter-toggle ${onlySelected ? 'active' : ''}`} onClick={() => setOnlySelected((value) => !value)}><Icon name="check" size={15} /> Yalnız prioritetlər</button><span className="result-count">{filtered.length} nəticə</span></div><Panel className="table-panel"><div className="table-scroll"><table className="data-table"><thead><tr><th>ID</th><th>İstiqamət</th><th>Uzunluq</th><th>Yeni məntəqə</th><th>İnteqrasiya rolu</th><th>İcra xərci</th><th>₼ / fayda</th><th>Status</th></tr></thead><tbody>{filtered.map((row) => <tr key={row.id}><td><span className="table-id">{row.id}</span></td><td><strong>{row.name}</strong><small>{row.from} → {row.to}</small></td><td>{fmt(row.length_km, 2)} km</td><td><b className="accent-number">+{row.newly_connected}</b></td><td>{row.merges_network ? <StatusBadge tone="purple">Şəbəkəni birləşdirir</StatusBadge> : row.links_transit_hub ? <StatusBadge tone="blue">Hub-a bağlanır</StatusBadge> : <span className="muted-text">Last-mile əlaqə</span>}</td><td>{money(row.cost_azn)}</td><td>{money(row.azn_per_benefit)}</td><td><StatusBadge tone={row.selected ? 'mint' : 'gray'}>{row.selected ? 'Prioritet' : 'Gözləmə'}</StatusBadge></td></tr>)}</tbody></table></div></Panel></>
+  return <><SectionHeader eyebrow="LAST-MILE PLANLAŞDIRMA" title="Prioritet last-mile bağlantılar" description="Avtovağzal, metro, avtobus şəbəkəsi və velosiped zolaqları arasındakı son-mil boşluqlarını təsir və xərc üzrə prioritetləşdirin." action={<button className="secondary-button" type="button" onClick={() => downloadCsv('routora-prioritet-baglantilar.csv', filtered)}><Icon name="download" size={15} /> CSV yüklə</button>} /><div className="filter-row"><div className="input-search"><Icon name="search" size={16} /><input placeholder="Hub, istiqamət və ya küçə axtar…" value={query} onChange={(event) => setQuery(event.target.value)} /></div><button type="button" className={`filter-toggle ${onlySelected ? 'active' : ''}`} onClick={() => setOnlySelected((value) => !value)}><Icon name="check" size={15} /> Yalnız prioritetlər</button><span className="result-count">{filtered.length} nəticə</span></div><Panel className="table-panel"><div className="table-scroll"><table className="data-table"><thead><tr><th>ID</th><th>İstiqamət</th><th>Uzunluq</th><th>Yeni məntəqə</th><th>İnteqrasiya rolu</th><th>İcra xərci</th><th>₼ / fayda</th><th>Status</th></tr></thead><tbody>{filtered.map((row) => <tr key={row.id}><td><span className="table-id">{row.id}</span></td><td><strong>{row.name}</strong><small>{row.from} → {row.to}</small></td><td>{fmt(row.length_km, 2)} km</td><td><b className="accent-number">+{row.newly_connected}</b></td><td>{row.merges_network ? <StatusBadge tone="purple">Şəbəkəni birləşdirir</StatusBadge> : row.links_transit_hub ? <StatusBadge tone="blue">Hub-a bağlanır</StatusBadge> : <span className="muted-text">Last-mile əlaqə</span>}</td><td>{money(row.cost_azn)}</td><td>{money(row.azn_per_benefit)}</td><td><StatusBadge tone={row.selected ? 'mint' : 'gray'}>{row.selected ? 'Prioritet' : 'Gözləmə'}</StatusBadge></td></tr>)}</tbody></table></div></Panel></>
 }
 
 function HubsView({ hubs }) {
   const selected = hubs.filter((hub) => hub.selected).sort((a, b) => a.rank - b.rank)
   const candidateRows = hubs.filter((hub) => !hub.selected).sort((a, b) => b.n_lines - a.n_lines)
   const candidates = candidateRows.slice(0, 5)
-  return <><SectionHeader eyebrow="MOBILITY HUB PLANLAŞDIRMA" title="Mobility hub-lar" description="Avtovağzal, metro, avtobus xətləri və mikromobillik məntəqələrini eyni qovşaqda inteqrasiya edin." action={<button className="secondary-button" type="button" onClick={() => downloadCsv('axin-hub-namizedleri.csv', candidateRows)}><Icon name="download" size={15} /> Namizəd siyahısı</button>} /><div className="hub-summary-grid"><MetricCard label="Prioritet mobility hub" value={selected.length} change={`+${selected.reduce((sum, hub) => sum + hub.n_lines, 0)}`} changeLabel="avtobus xətti əhatəsi" tone="purple" icon="pin" /><MetricCard label="İnteqrasiya olunan məntəqə" value={selected.reduce((sum, hub) => sum + hub.parkings, 0)} change="mövcud" changeLabel="yeni satınalma tələb etmir" tone="mint" icon="bike" /><MetricCard label="500 m-də sakin" value={fmt(selected.reduce((sum, hub) => sum + hub.pop, 0))} change="əhatə" changeLabel="seçilmiş hub-ların cəmi" tone="orange" icon="map" /></div><div className="dashboard-grid hubs-grid"><Panel className="wide-panel"><PanelHeader title="Prioritet mobility hub-lar" subtitle="Fayda və multimodal əlçatanlıq balına görə sıralanıb" /><div className="selected-hubs">{selected.map((hub) => <div className="selected-hub" key={hub.name}><div className="selected-hub-rank">{String(hub.rank).padStart(2, '0')}</div><div className="selected-hub-main"><span className="eyebrow">{hub.kind} · HUB</span><h3>{hub.name}</h3><p>{hub.reason}</p><div className="tag-row"><StatusBadge tone="blue">{hub.n_lines} avtobus xətti</StatusBadge><StatusBadge tone="gray">{hub.parkings} məntəqə</StatusBadge><StatusBadge tone="mint">{money(hub.cost_azn)}</StatusBadge></div></div><div className="hub-score"><b>{fmt(hub.pop)}</b><span>potensial sakin</span><div className="score-line"><i style={{ width: `${Math.min((hub.pop / 18000) * 100, 100)}%` }} /></div></div></div>)}</div></Panel><Panel><PanelHeader title="Növbəti hub namizədləri" subtitle="Yüksək xətt sıxlığı və last-mile potensialı" /><Bars items={candidates.map((hub) => ({ label: hub.name.replace(' metro', ''), value: hub.n_lines }))} formatter={(value) => `${value} xətt`} color="#36b7d8" /></Panel></div></>
-}
-
-function FinanceView({ summary, finance }) {
-  const [expenseView, setExpenseView] = useState('list')
-  const max = Math.max(...finance.map((row) => row['cəmi_azn']))
-  const expenseSegments = finance.map((row) => ({ label: row['maddə'], value: Number(row['cəmi_azn']) || 0 }))
-  const expenseTotal = expenseSegments.reduce((sum, segment) => sum + segment.value, 0)
-
-  return <>
-    <SectionHeader eyebrow="İCRA VƏ İNVESTİSİYA" title="Vahid sistemin icra planı" description="Mobility hub-lar, last-mile bağlantıları və rəqəmsal idarəetmə üçün mərhələli investisiya çərçivəsi." action={<button className="secondary-button" type="button" onClick={() => downloadCsv('axin-maliyye-hesabati.csv', finance)}><Icon name="download" size={15} /> Maliyyə hesabatı</button>} />
-    <div className="finance-hero"><div><span className="eyebrow mint">VAHİD SİSTEMİN ÜMUMİ İNVESTİSİYASI</span><h1>{money(summary.capex_azn)}</h1><p>{summary.selected_km} km last-mile bağlantı, {summary.phases['GƏLƏCƏK'].hubs} mobility hub və rəqəmsal idarəetmə.</p></div><div className="finance-hero-stats"><div><b>{money(summary.saving_lanes_azn + summary.saving_parking_azn)}</b><span>mövcud infrastrukturla qənaət</span></div><div><b>{money(summary.azn_per_new_connection)}</b><span>1 yeni qoşulma / bağlantı</span></div><div><b>{summary.months} ay</b><span>təxmini icra</span></div></div></div>
-    <div className="dashboard-grid finance-grid">
-      <Panel className="wide-panel">
-        <PanelHeader title="Vahid sistem xərcləri" subtitle="Hub, last-mile və rəqəmsal idarəetmə · AZN" action={<div className="finance-panel-actions"><div className="expense-view-toggle" role="group" aria-label="Xərc görünüşü"><button type="button" className={expenseView === 'list' ? 'active' : ''} aria-pressed={expenseView === 'list'} onClick={() => setExpenseView('list')}><Icon name="list" size={15} /> Siyahı</button><button type="button" className={expenseView === 'chart' ? 'active' : ''} aria-pressed={expenseView === 'chart'} onClick={() => setExpenseView('chart')}><Icon name="chart" size={15} /> Qrafik</button></div></div>} />
-        {expenseView === 'list' ? <div className="finance-bars">{finance.map((row) => <div className="finance-bar" key={row['maddə']}><div className="finance-bar-top"><span>{row['maddə']}</span><b>{money(row['cəmi_azn'])}</b></div><div className="finance-track"><i style={{ width: `${(row['cəmi_azn'] / max) * 100}%` }} /></div><small>{fmt(row.miqdar, 2)} {row.vahid} × {money(row['vahid_qiymət_azn'])}</small></div>)}</div> : <DonutChart className="finance-donut" segments={expenseSegments} centerValue={money(expenseTotal)} centerLabel="ümumi xərc" />}
-      </Panel>
-      <Panel><PanelHeader title="İcra mərhələləri" subtitle="Təxmini timeline" /><div className="timeline"><div className="timeline-item"><span className="timeline-dot done" /><div><b>Hazırlıq və layihələndirmə</b><small>Ay 1–2 · 2 ay</small></div></div><div className="timeline-item"><span className="timeline-dot current" /><div><b>Prioritet bağlantıların icrası</b><small>Ay 3–6 · 4 ay</small></div></div><div className="timeline-item"><span className="timeline-dot future" /><div><b>Hub və platforma inteqrasiyası</b><small>Ay 7–8 · 2 ay</small></div></div></div><div className="savings-card"><span className="eyebrow">QƏNAƏT</span><b>{money(summary.saving_lanes_azn + summary.saving_parking_azn)}</b><p>Rənglənmiş zolaq və mövcud məntəqələrin təkrar istifadəsi.</p></div></Panel>
-    </div>
-  </>
+  return <><SectionHeader eyebrow="MOBILITY HUB PLANLAŞDIRMA" title="Mobility hub-lar" description="Avtovağzal, metro, avtobus xətləri və mikromobillik məntəqələrini eyni qovşaqda inteqrasiya edin." action={<button className="secondary-button" type="button" onClick={() => downloadCsv('routora-hub-namizedleri.csv', candidateRows)}><Icon name="download" size={15} /> Namizəd siyahısı</button>} /><div className="hub-summary-grid"><MetricCard label="Prioritet mobility hub" value={selected.length} change={`+${selected.reduce((sum, hub) => sum + hub.n_lines, 0)}`} changeLabel="avtobus xətti əhatəsi" tone="purple" icon="pin" /><MetricCard label="İnteqrasiya olunan məntəqə" value={selected.reduce((sum, hub) => sum + hub.parkings, 0)} change="mövcud" changeLabel="yeni satınalma tələb etmir" tone="mint" icon="bike" /><MetricCard label="500 m-də sakin" value={fmt(selected.reduce((sum, hub) => sum + hub.pop, 0))} change="əhatə" changeLabel="seçilmiş hub-ların cəmi" tone="orange" icon="map" /></div><div className="dashboard-grid hubs-grid"><Panel className="wide-panel"><PanelHeader title="Prioritet mobility hub-lar" subtitle="Fayda və multimodal əlçatanlıq balına görə sıralanıb" /><div className="selected-hubs">{selected.map((hub) => <div className="selected-hub" key={hub.name}><div className="selected-hub-rank">{String(hub.rank).padStart(2, '0')}</div><div className="selected-hub-main"><span className="eyebrow">{hub.kind} · HUB</span><h3>{hub.name}</h3><p>{hub.reason}</p><div className="tag-row"><StatusBadge tone="blue">{hub.n_lines} avtobus xətti</StatusBadge><StatusBadge tone="gray">{hub.parkings} məntəqə</StatusBadge><StatusBadge tone="mint">{money(hub.cost_azn)}</StatusBadge></div></div><div className="hub-score"><b>{fmt(hub.pop)}</b><span>potensial sakin</span><div className="score-line"><i style={{ width: `${Math.min((hub.pop / 18000) * 100, 100)}%` }} /></div></div></div>)}</div></Panel><Panel><PanelHeader title="Növbəti hub namizədləri" subtitle="Yüksək xətt sıxlığı və last-mile potensialı" /><Bars items={candidates.map((hub) => ({ label: hub.name.replace(' metro', ''), value: hub.n_lines }))} formatter={(value) => `${value} xətt`} color="#36b7d8" /></Panel></div></>
 }
 
 export default App
