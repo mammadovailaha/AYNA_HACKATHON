@@ -4,8 +4,8 @@ import { Mark, searchClass, useSearchMatch } from './Search'
 
 export function StatusBadge({ children, tone = 'purple' }) { return <span className={`status-badge ${tone}`}>{children}</span> }
 
-export function SectionHeader({ eyebrow, title, description, action }) {
-  return <div className="section-header"><div><span className="eyebrow">{eyebrow}</span><h2><Mark text={title} /></h2>{description && <p>{description}</p>}</div>{action}</div>
+export function SectionHeader({ title, description, action }) {
+  return <div className="section-header"><div><h2><Mark text={title} /></h2>{description && <p>{description}</p>}</div>{action}</div>
 }
 
 // Panelin axtarış başlığı: açıq searchTitle və ya daxilindəki PanelHeader-in title-ı

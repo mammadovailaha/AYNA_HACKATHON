@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Icon from './components/Icon'
-import { AreaChart, Bars, DonutChart } from './components/Charts'
+import { AreaChart, Bars } from './components/Charts'
 import { MetricCard, Panel, PanelHeader, SectionHeader, StatusBadge } from './components/Ui'
 import { useDashboardData } from './hooks/useDashboardData'
 import { useLiveDashboard } from './hooks/useLiveDashboard'
 import NetworkMap from './components/NetworkMap'
 import { ComparisonTable, InfrastructureCards, InfrastructureGrowthChart, LaneRecalculation, RealtimeStatus, VerificationBadge } from './components/Infrastructure'
-import { Mark, SearchCard, SearchProvider } from './components/Search'
+import { fold, Mark, SearchCard, SearchHighlight, SearchProvider } from './components/Search'
 
 const BRAND = 'ROUTORA'
 
@@ -28,7 +28,6 @@ const MAP_CATEGORIES = {
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
 
 const fmt = (value, digits = 0) => Number(value || 0).toLocaleString('az-AZ', { maximumFractionDigits: digits, minimumFractionDigits: digits })
-const money = (value) => `${fmt(value)} ₼`
 const csvCell = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`
 const downloadCsv = (filename, rows) => {
   if (!rows?.length) return
@@ -50,6 +49,20 @@ const downloadCsv = (filename, rows) => {
 const openMap = () => window.open('/processed/xerite_after.html', '_blank', 'noopener,noreferrer')
 const phaseKeys = ['ƏVVƏL', 'İNDİ', 'GƏLƏCƏK']
 
+const findSearchView = (query, data) => {
+  const term = fold(query.trim())
+  if (!term || !data) return null
+  const { connections = [], hubs = [] } = data
+  const views = [
+    { id: 'overview', terms: ['Vahid mərkəz', 'Vahid multimodal idarəetmə mərkəzi', 'Velo şəbəkəsi', 'Multimodal əhatə', 'Last-mile boşluğu', 'Vahid şəbəkə əhatəsi', 'Mövcud və planlaşdırılan şəbəkə', 'Əlaqəsiz məntəqə', 'İnfrastruktur artımı'] },
+    { id: 'map', terms: ['Hub xəritəsi', 'HUB şəbəkəsi', 'Mikromobillik məntəqələri', 'Mərkəzi hub-lar', 'Mövcud hub-lar', 'Hub namizədləri', ...hubs.flatMap((hub) => [hub.name, hub.id])] },
+    { id: 'before-after', terms: ['Şəbəkə ssenarisi', 'Şəbəkənin vahid sistemə çevrilməsi', 'Mövcud vəziyyət', 'Planlaşdırılan'] },
+    { id: 'connections', terms: ['Last-mile bağlantılar', 'Prioritet last-mile bağlantılar', 'İstiqamət', 'İnteqrasiya rolu', ...connections.flatMap((row) => [row.id, row.name, row.from, row.to])] },
+    { id: 'hubs', terms: ['Mobility hub-lar', 'Prioritet mobility hub-lar', 'Mərkəzi hub-lar', ...hubs.flatMap((hub) => [hub.name, hub.id])] }
+  ]
+  return views.find((view) => view.terms.some((value) => fold(value).includes(term)))?.id ?? null
+}
+
 function App() {
   const { data, loading, error } = useDashboardData()
   const [activeView, setActiveView] = useState('overview')
@@ -59,6 +72,7 @@ function App() {
   const [hits, setHits] = useState(null)
   const [mapCategory, setMapCategory] = useState(null)
   const searchInput = useRef(null)
+  const searchTarget = useMemo(() => findSearchView(query, data), [query, data])
 
   // Axtarış qısayolu: Win/⌘ + K (Windows Win+K-nı sistem üçün tutur), Ctrl + K və "/" alternativdir
   useEffect(() => {
@@ -84,7 +98,7 @@ function App() {
   if (loading) return <div className="loading-screen"><img className="loading-logo" src="/assets/routora.png" alt={BRAND} /><div className="loader" /><p>Dashboard məlumatları hazırlanır…</p></div>
   if (error || !data) return <div className="loading-screen error-screen"><img className="loading-logo" src="/assets/routora.png" alt={BRAND} /><h2>Data yüklənmədi</h2><p>{error || 'Naməlum xəta'}</p><small>API serverinin işlədiyinə əmin olun (npm run dev və ya npm start).</small></div>
 
-  const { summary, connections, hubs, finance } = data
+  const { summary, connections, hubs } = data
   const viewTitle = navItems.find((item) => item.id === activeView)?.label ?? 'Ümumi baxış'
 
   const handleNavClick = (viewId) => {
@@ -97,26 +111,36 @@ function App() {
     setActiveView('map')
     window.scrollTo({ top: 0 })
   }
-  const jumpToFirstHit = () => document.querySelector('.content-wrap .search-hit')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  const jumpToFirstHit = () => {
+    const firstHit = document.querySelector('.content-wrap .search-hit')
+    if (firstHit) {
+      firstHit.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      return
+    }
+    if (!searchTarget) return
+    setActiveView(searchTarget)
+    setSidebarOpen(false)
+    requestAnimationFrame(() => document.querySelector('.content-wrap .search-hit')?.scrollIntoView({ behavior: 'smooth', block: 'center' }))
+  }
 
-  return <div className="app-shell">
+  return <div className={`app-shell ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
     <aside className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${sidebarOpen ? 'open' : ''}`}>
       <div className="brand"><img className="brand-logo brand-logo-full" src="/assets/routora-with-text.png" alt={BRAND} /><img className="brand-logo brand-logo-compact" src="/assets/routora.png" alt={BRAND} /><button className="sidebar-toggle" onClick={() => setSidebarCollapsed((value) => !value)} aria-label={sidebarCollapsed ? 'Sidebarı aç' : 'Sidebarı bağla'} title={sidebarCollapsed ? 'Sidebarı aç' : 'Sidebarı bağla'}><Icon name="chevron" size={17} /></button><button className="close-sidebar" onClick={() => setSidebarOpen(false)} aria-label="Menyunu bağla">×</button></div>
       <nav className="main-nav"><span className="nav-caption">İDARƏETMƏ</span>{navItems.map((item) => <button key={item.id} className={activeView === item.id ? 'active' : ''} data-tooltip={item.label} aria-label={item.label} onClick={() => handleNavClick(item.id)}><Icon name={item.icon} size={18} /><span>{item.label}</span>{item.id === 'connections' && <em>{connections.filter((row) => row.selected).length}</em>}</button>)}</nav>
-      <div className="sidebar-bottom"><div className="status-card" data-tooltip="Real-time data qatı"><RealtimeStatus compact /></div><div className="user-card" data-tooltip="AYNA qərar mərkəzi"><img className="avatar profile-avatar" src="/assets/user_photo.jpeg" alt="AYNA qərar mərkəzi" /><div><b>AYNA qərar mərkəzi</b><small>İdarəetmə paneli</small></div><Icon name="user" size={20} /></div></div>
+      <div className="sidebar-bottom"><div className="status-card" data-tooltip="Real-time data qatı"><RealtimeStatus compact /></div></div>
     </aside>
     {sidebarOpen && <button className="sidebar-backdrop" aria-label="Menyunu bağla" onClick={() => setSidebarOpen(false)} />}
     <main className="main-content">
-      <header className="topbar"><button className="mobile-menu" onClick={() => setSidebarOpen(true)}><Icon name="grid" size={20} /></button><div className="breadcrumb"><span>{BRAND} /</span><b>{viewTitle}</b></div><div className="top-actions"><RealtimeStatus compact />
+      <header className="topbar"><button className="mobile-menu" onClick={() => setSidebarOpen(true)}><Icon name="grid" size={20} /></button><div className="breadcrumb"><span>{BRAND} /</span><b>{viewTitle}</b></div><div className="top-actions">
         <div className={`top-search ${query ? 'has-query' : ''}`} role="search">
           <Icon name="search" size={16} />
           <input ref={searchInput} type="search" value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => { if (event.key === 'Escape') { setQuery(''); event.currentTarget.blur() } if (event.key === 'Enter') jumpToFirstHit() }} placeholder="Dashboardda axtar…" aria-label="Dashboard kart və diaqram başlıqlarında axtar" title={`Qısayol: ${isMac ? '⌘' : 'Win'} + K · Ctrl + K · /`} />
           {query ? <button type="button" className="search-clear" onClick={() => { setQuery(''); searchInput.current?.focus() }} aria-label="Axtarışı təmizlə"><Icon name="close" size={13} /></button> : <kbd>{isMac ? '⌘ K' : 'Ctrl K'}</kbd>}
-          {hits !== null && <div className={`search-status ${hits ? '' : 'empty'}`} role="status">{hits ? `${hits} uyğun kart/diaqram · Enter — keç` : 'Nəticə tapılmadı'}</div>}
+          {hits !== null && <div className={`search-status ${hits || searchTarget ? '' : 'empty'}`} role="status">{hits ? `${hits} uyğun kart/diaqram · Enter — keç` : searchTarget ? 'Nəticə başqa səhifədədir · Enter — aç' : 'Nəticə tapılmadı'}</div>}
         </div>
         <img className="top-avatar profile-avatar" src="/assets/user_photo.jpeg" alt="AYNA qərar mərkəzi" /></div></header>
       <SearchProvider query={query}><div className="content-wrap">
-        {activeView === 'overview' && <Overview summary={summary} connections={connections} hubs={hubs} finance={finance} onCategory={openCategory} />}
+        {activeView === 'overview' && <Overview summary={summary} connections={connections} hubs={hubs} onCategory={openCategory} />}
         {activeView === 'map' && <MapView category={mapCategory} onClearCategory={() => setMapCategory(null)} />}
         {activeView === 'before-after' && <BeforeAfterView summary={summary} />}
         {activeView === 'connections' && <ConnectionsView connections={connections} />}
@@ -126,7 +150,7 @@ function App() {
   </div>
 }
 
-function Overview({ summary, connections, hubs, finance, onCategory }) {
+function Overview({ summary, connections, hubs, onCategory }) {
   const live = useLiveDashboard().data
   const infra = live.summary.infrastructure
   const phases = summary.phases
@@ -135,22 +159,19 @@ function Overview({ summary, connections, hubs, finance, onCategory }) {
   const scenarioYear = current.label.match(/\b\d{4}\b/)?.[0] ?? 'İNDİ'
   const selectedConnections = connections.filter((row) => row.selected)
   const selectedHubs = hubs.filter((row) => row.selected).sort((a, b) => a.rank - b.rank)
-  const financeTop = finance.slice().sort((a, b) => b['cəmi_azn'] - a['cəmi_azn']).slice(0, 5).map((row) => ({ label: row['maddə'], value: row['cəmi_azn'] }))
   const coverageChange = ((future.coverage_pct - current.coverage_pct) / current.coverage_pct * 100).toFixed(1)
   const reportRows = [
     { göstərici: 'Mövcud velosiped infrastrukturu', dəyər: `${fmt(infra.existing_km, 1)} km`, qeyd: 'Tikilib' },
     { göstərici: 'Yeni əlavə ediləcək hissə', dəyər: `+${fmt(infra.planned_addition_km, 1)} km`, qeyd: 'Planlaşdırılır' },
     { göstərici: 'Planlaşdırılan ümumi uzunluq', dəyər: `${fmt(infra.projected_total_km, 1)} km`, qeyd: 'Proqnoz' },
     { göstərici: 'İnfrastruktur artımı', dəyər: `${fmt(infra.growth_pct, 2)}%`, qeyd: 'Hesablanmış' },
-    { göstərici: 'Ümumi kapital xərci', dəyər: money(summary.capex_azn), qeyd: 'AZN' },
     { göstərici: 'Təxmini icra müddəti', dəyər: `${summary.months} ay`, qeyd: 'İnkişaf ssenarisi' },
     { göstərici: 'Yeni qoşulan məntəqə', dəyər: `+${summary.newly_connected}`, qeyd: 'Məntəqə' }
   ]
   return <>
-    <SectionHeader eyebrow="AYNA · MOBILITY HUB & LAST-MILE" title="Vahid multimodal idarəetmə mərkəzi" description={`Avtobus, metro, velosiped zolaqları və mobility hub-ları ${scenarioYear} ssenarisi ilə bir sistemdə izləyin.`} action={<div className="header-actions"><button className="secondary-button" type="button" onClick={() => downloadCsv('routora-umumi-hesabat.csv', reportRows)}><Icon name="download" size={15} /> Hesabatı yüklə</button></div>} />
+    <SectionHeader title="Vahid multimodal idarəetmə mərkəzi" description={`Avtobus, metro, velosiped zolaqları və mobility hub-ları ${scenarioYear} ssenarisi ilə bir sistemdə izləyin.`} action={<div className="header-actions"><button className="secondary-button" type="button" onClick={() => downloadCsv('routora-umumi-hesabat.csv', reportRows)}><Icon name="download" size={15} /> Hesabatı yüklə</button></div>} />
     <div className="hero-banner">
       <div className="hero-copy">
-        <span className="eyebrow mint">{scenarioYear} · MOBILITY HUB SSENARİSİ</span>
         <h1>Son mili tamamla,<br /><em>şəbəkəni vahid sistemə çevir.</em></h1>
         <p>{BRAND} avtobus və metro qovşaqlarını, velo zolaqlarını və mikromobillik məntəqələrini birləşdirərək mövcud {fmt(infra.existing_km, 1)} km şəbəkəni +{fmt(infra.planned_addition_km, 1)} km planlaşdırılan bağlantı ilə {fmt(infra.projected_total_km, 1)} km vahid last-mile sisteminə çevirir.</p>
         <nav className="system-flow" aria-label="Kateqoriyanı xəritədə aç">{Object.entries(MAP_CATEGORIES).map(([key, cat], index) => <React.Fragment key={key}>{index > 0 && <i aria-hidden="true">→</i>}<button type="button" className={`mode-chip chip-${key}`} onClick={() => onCategory(key)} title={`${cat.note} — xəritədə aç`}><Icon name={cat.icon} size={17} /> {cat.label}</button></React.Fragment>)}</nav>
@@ -163,15 +184,15 @@ function Overview({ summary, connections, hubs, finance, onCategory }) {
         <span className="node n1" /><span className="node n2" /><span className="node n3" /><span className="node n4" />
       </div>
     </div>
-    <div className="metric-grid"><MetricCard label="Velo şəbəkəsi" value={`${fmt(infra.existing_km, 1)} km`} change={`+${fmt(infra.planned_addition_km, 1)} km`} changeLabel={`planlaşdırılır · +${fmt(infra.growth_pct, 2)}%`} tone="purple" icon="route" /><MetricCard label="Multimodal əhatə" value={`${fmt(current.coverage_pct, 1)}%`} change={`+${fmt(future.coverage_pct - current.coverage_pct, 1)}%`} changeLabel={`ssenari · ${coverageChange}% artım`} tone="mint" icon="map" /><MetricCard label="Last-mile boşluğu" value={fmt(current.disconnected)} change={`-${fmt(current.disconnected - future.disconnected)}`} changeLabel="hub ssenarisi sonrası" tone="orange" icon="pin" /><MetricCard label="İcra və xidmət xərci" value={money(summary.maintenance_azn_year)} change="8 ay" changeLabel="vahid sistemin icrası" tone="blue" icon="wallet" /></div>
-    <SectionHeader eyebrow="VELOSİPED İNFRASTRUKTURU" title="Mövcud və planlaşdırılan şəbəkə" description="Mövcud yollar tikilib; əlavə hissə planlaşdırılır və hələ tikilməyib. Ümumi uzunluq və artım faizi API-də avtomatik hesablanır." />
+    <div className="metric-grid"><MetricCard label="Velo şəbəkəsi" value={`${fmt(infra.existing_km, 1)} km`} change={`+${fmt(infra.planned_addition_km, 1)} km`} changeLabel={`planlaşdırılır · +${fmt(infra.growth_pct, 2)}%`} tone="purple" icon="route" /><MetricCard label="Multimodal əhatə" value={`${fmt(current.coverage_pct, 1)}%`} change={`+${fmt(future.coverage_pct - current.coverage_pct, 1)}%`} changeLabel={`ssenari · ${coverageChange}% artım`} tone="mint" icon="map" /><MetricCard label="Last-mile boşluğu" value={fmt(current.disconnected)} change={`-${fmt(current.disconnected - future.disconnected)}`} changeLabel="hub ssenarisi sonrası" tone="orange" icon="pin" /></div>
+    <SectionHeader title="Mövcud və planlaşdırılan şəbəkə" description="Mövcud yollar tikilib; əlavə hissə planlaşdırılır və hələ tikilməyib. Ümumi uzunluq və artım faizi API-də avtomatik hesablanır." />
     <div className="infra-layout">
       <InfrastructureCards infra={infra} />
       <Panel className="growth-panel"><PanelHeader title="İnfrastruktur artımı" subtitle="BEFORE → ADDITION → PROJECTED TOTAL" action={<StatusBadge tone="mint">+{fmt(infra.growth_pct, 2)}%</StatusBadge>} /><InfrastructureGrowthChart infra={infra} /></Panel>
       <Panel className="realtime-panel"><PanelHeader title="Real-time data statusu" subtitle="Server-Sent Events" /><RealtimeStatus /></Panel>
       <Panel className="comparison-panel"><PanelHeader title="Mövcud vs planlaşdırılan" subtitle="Plan tətbiq olunduqdan sonrakı proqnoz" /><ComparisonTable comparison={live.comparison} /></Panel>
     </div>
-    <div className="dashboard-grid overview-grid"><Panel className="coverage-panel"><PanelHeader title="Vahid şəbəkə əhatəsi" subtitle="Avtobus · metro · velo · hub" action={<StatusBadge tone="mint">+{fmt(future.coverage_pct - current.coverage_pct, 1)} pp</StatusBadge>} /><AreaChart values={phaseKeys.map((key) => phases[key].coverage_pct)} labels={['2025', '2026', 'Ssenari']} /><div className="chart-footnote"><span><i className="legend-dot purple" />Zolaq və hub-a 300 m-də yaşayan sakin</span><b>{fmt(future.coverage_pop)} nəfər</b></div></Panel><Panel><PanelHeader title="Hub və bağlantı investisiyası" subtitle="Vahid sistem üzrə prioritetlər" /><DonutChart segments={financeTop.slice(0, 4)} centerValue={money(summary.capex_azn)} centerLabel="ümumi" /></Panel><Panel className="wide-panel"><PanelHeader title="Last-mile prioritetləri" subtitle={`${selectedConnections.length} bağlantı seçilib · fayda/xərc nisbətinə görə`} /><div className="priority-table"><div className="priority-head"><span>İSTİQAMƏT</span><span>UZUNLUQ</span><span>YENİ MƏNTƏQƏ</span><span>XƏRC</span><span>STATUS</span></div>{selectedConnections.slice(0, 5).map((row) => <div className="priority-row" key={row.id}><div><strong>{row.name}</strong><small>{row.from} → {row.to}</small></div><b>{fmt(row.length_km, 2)} km</b><b>{row.newly_connected}</b><b>{money(row.cost_azn)}</b><StatusBadge tone="mint">Seçildi</StatusBadge></div>)}</div></Panel><Panel className="wide-panel hub-panel"><PanelHeader title="Prioritet mobility hub-lar" subtitle="Avtobus, metro və mikromobillik inteqrasiya nöqtələri" /><div className="hub-list">{selectedHubs.slice(0, 4).map((hub) => <div className="hub-item" key={hub.name}><span className="hub-rank">0{hub.rank}</span><div className="hub-main"><strong>{hub.name}</strong><span><Icon name="route" size={13} /> {hub.n_lines} avtobus xətti <i /> <Icon name="pin" size={13} /> {hub.parkings} məntəqə</span></div><div className="hub-pop"><b>{fmt(hub.pop)}</b><span>500 m-də sakin</span></div><Icon name="chevron" size={16} className="muted-icon" /></div>)}</div></Panel></div>
+    <div className="dashboard-grid overview-grid"><Panel className="coverage-panel wide-panel"><PanelHeader title="Vahid şəbəkə əhatəsi" subtitle="Avtobus · metro · velo · hub" action={<StatusBadge tone="mint">+{fmt(future.coverage_pct - current.coverage_pct, 1)} pp</StatusBadge>} /><AreaChart values={phaseKeys.map((key) => phases[key].coverage_pct)} labels={['2025', '2026', 'Ssenari']} /><div className="chart-footnote"><span><i className="legend-dot purple" />Zolaq və hub-a 300 m-də yaşayan sakin</span><b>{fmt(future.coverage_pop)} nəfər</b></div></Panel><Panel className="wide-panel"><PanelHeader title="Last-mile prioritetləri" subtitle={`${selectedConnections.length} bağlantı seçilib · təsir və əlaqələndirmə potensialına görə`} /><div className="priority-table"><div className="priority-head"><span>İSTİQAMƏT</span><span>UZUNLUQ</span><span>YENİ MƏNTƏQƏ</span><span>STATUS</span></div>{selectedConnections.slice(0, 5).map((row) => <div className="priority-row" key={row.id}><div><strong>{row.name}</strong><small>{row.from} → {row.to}</small></div><b>{fmt(row.length_km, 2)} km</b><b>{row.newly_connected}</b><StatusBadge tone="mint">Seçildi</StatusBadge></div>)}</div></Panel><Panel className="wide-panel hub-panel"><PanelHeader title="Prioritet mobility hub-lar" subtitle="Avtobus, metro və mikromobillik inteqrasiya nöqtələri" /><div className="hub-list">{selectedHubs.slice(0, 4).map((hub) => <div className="hub-item" key={hub.name}><span className="hub-rank">0{hub.rank}</span><div className="hub-main"><strong>{hub.name}</strong><span><Icon name="route" size={13} /> {hub.n_lines} avtobus xətti <i /> <Icon name="pin" size={13} /> {hub.parkings} məntəqə</span></div><div className="hub-pop"><b>{fmt(hub.pop)}</b><span>500 m-də sakin</span></div><Icon name="chevron" size={16} className="muted-icon" /></div>)}</div></Panel></div>
   </>
 }
 
@@ -191,7 +212,7 @@ function MapView({ category, onClearCategory }) {
     { key: 'stations', label: 'Mikromobillik məntəqələri', value: `${hubNetwork.counts.stations_total}` }
   ]
   return <>
-    <SectionHeader eyebrow="GIS · HUB ŞƏBƏKƏSİ" title="HUB xəritəsi" description="Peyk görünüşündə mərkəzi hub-lar, ulduz şəbəkəsi əlaqələri, əhatə radiusları və sıxlıq. Hub-a klik edin — ona aid məntəqələr, zolaqlar və əlaqələr vurğulanacaq." action={<div className="header-actions"><button className="secondary-button" type="button" onClick={openMap}><Icon name="external" size={15} /> Əvvəlki xəritə</button></div>} />
+    <SectionHeader title="HUB xəritəsi" description="Peyk görünüşündə mərkəzi hub-lar, ulduz şəbəkəsi əlaqələri, əhatə radiusları və sıxlıq. Hub-a klik edin — ona aid məntəqələr, zolaqlar və əlaqələr vurğulanacaq." action={<div className="header-actions"><button className="secondary-button" type="button" onClick={openMap}><Icon name="external" size={15} /> Əvvəlki xəritə</button></div>} />
     <NetworkMap key={category ? 'preset' : 'default'} title="HUB xəritəsi" toggles={toggles} heatMetricSwitch preset={preset} onClearPreset={onClearCategory} defaults={{ existing: true, planned: true, hubs: true, links: true, radius: false, heatmap: false, stations: false }} />
     <div className="dashboard-grid gis-notes">
       {unlocated.length > 0
@@ -238,7 +259,7 @@ function BeforeAfterView({ summary }) {
     <span className="map-note">Default: mövcud vəziyyət · yeni ssenari qatları checkbox ilə aktivləşir</span>
   </>
   return <>
-    <SectionHeader eyebrow="VƏZİYYƏT → SSENARİ" title="Şəbəkənin vahid sistemə çevrilməsi" description="Mövcud vəziyyət və yeni ssenari eyni xəritədə: əvvəlcə mövcud şəbəkəni görün, sonra hub, radius, əlaqə, heatmap və yeni infrastruktur qatlarını bir-bir aktivləşdirin." action={<StatusBadge tone="mint">+{fmt(infra.addition_km, 1)} km planlaşdırılır · +{fmt(infra.growth_pct, 2)}%</StatusBadge>} />
+    <SectionHeader title="Şəbəkənin vahid sistemə çevrilməsi" description="Mövcud vəziyyət və yeni ssenari eyni xəritədə: əvvəlcə mövcud şəbəkəni görün, sonra hub, radius, əlaqə, heatmap və yeni infrastruktur qatlarını bir-bir aktivləşdirin." action={<StatusBadge tone="mint">+{fmt(infra.addition_km, 1)} km planlaşdırılır · +{fmt(infra.growth_pct, 2)}%</StatusBadge>} />
     <div className="comparison-grid">{comparison.map((item) => <SearchCard as="div" className="comparison-stat" title={item.label} key={item.label}><span><Mark text={item.label} /></span><div><b>{item.before}</b><Icon name="chevron" size={14} /><strong>{item.after}</strong></div></SearchCard>)}</div>
     <NetworkMap title="Şəbəkə ssenarisi xəritəsi" toggles={toggles} footer={footer} scenarioKey="planned" defaults={{ existing: true, stations: true, hubs: false, radius: false, links: false, heatmap: false, planned: false }} />
   </>
@@ -246,16 +267,20 @@ function BeforeAfterView({ summary }) {
 
 function ConnectionsView({ connections }) {
   const [query, setQuery] = useState('')
-  const [onlySelected, setOnlySelected] = useState(true)
-  const filtered = useMemo(() => connections.filter((row) => (!onlySelected || row.selected) && `${row.id} ${row.name} ${row.from} ${row.to}`.toLowerCase().includes(query.toLowerCase())).sort((a, b) => a.azn_per_benefit - b.azn_per_benefit), [connections, onlySelected, query])
-  return <><SectionHeader eyebrow="LAST-MILE PLANLAŞDIRMA" title="Prioritet last-mile bağlantılar" description="Avtovağzal, metro, avtobus şəbəkəsi və velosiped zolaqları arasındakı son-mil boşluqlarını təsir və xərc üzrə prioritetləşdirin." action={<button className="secondary-button" type="button" onClick={() => downloadCsv('routora-prioritet-baglantilar.csv', filtered)}><Icon name="download" size={15} /> CSV yüklə</button>} /><div className="filter-row"><div className="input-search"><Icon name="search" size={16} /><input placeholder="Hub, istiqamət və ya küçə axtar…" value={query} onChange={(event) => setQuery(event.target.value)} /></div><button type="button" className={`filter-toggle ${onlySelected ? 'active' : ''}`} onClick={() => setOnlySelected((value) => !value)}><Icon name="check" size={15} /> Yalnız prioritetlər</button><span className="result-count">{filtered.length} nəticə</span></div><Panel className="table-panel"><div className="table-scroll"><table className="data-table"><thead><tr><th>ID</th><th>İstiqamət</th><th>Uzunluq</th><th>Yeni məntəqə</th><th>İnteqrasiya rolu</th><th>İcra xərci</th><th>₼ / fayda</th><th>Status</th></tr></thead><tbody>{filtered.map((row) => <tr key={row.id}><td><span className="table-id">{row.id}</span></td><td><strong>{row.name}</strong><small>{row.from} → {row.to}</small></td><td>{fmt(row.length_km, 2)} km</td><td><b className="accent-number">+{row.newly_connected}</b></td><td>{row.merges_network ? <StatusBadge tone="purple">Şəbəkəni birləşdirir</StatusBadge> : row.links_transit_hub ? <StatusBadge tone="blue">Hub-a bağlanır</StatusBadge> : <span className="muted-text">Last-mile əlaqə</span>}</td><td>{money(row.cost_azn)}</td><td>{money(row.azn_per_benefit)}</td><td><StatusBadge tone={row.selected ? 'mint' : 'gray'}>{row.selected ? 'Prioritet' : 'Gözləmə'}</StatusBadge></td></tr>)}</tbody></table></div></Panel></>
+  const filtered = useMemo(() => {
+    const term = fold(query.trim())
+    return connections
+      .filter((row) => !term || fold(`${row.id} ${row.name} ${row.from} ${row.to}`).includes(term))
+      .sort((a, b) => b.benefit - a.benefit)
+  }, [connections, query])
+  return <><SectionHeader title="Prioritet last-mile bağlantılar" description="Avtovağzal, metro, avtobus şəbəkəsi və velosiped zolaqları arasındakı son-mil boşluqlarını təsir və əlaqələndirmə potensialına görə prioritetləşdirin." action={<button className="secondary-button" type="button" onClick={() => downloadCsv('routora-prioritet-baglantilar.csv', filtered)}><Icon name="download" size={15} /> CSV yüklə</button>} /><div className="filter-row"><div className="input-search"><Icon name="search" size={16} /><input placeholder="Hub, istiqamət və ya küçə axtar…" value={query} onChange={(event) => setQuery(event.target.value)} /></div><span className="result-count">{filtered.length} nəticə</span></div><Panel className="table-panel"><div className="table-scroll"><table className="data-table"><thead><tr><th>ID</th><th>İstiqamət</th><th>Uzunluq</th><th>Yeni məntəqə</th><th>İnteqrasiya rolu</th><th>Status</th></tr></thead><tbody>{filtered.map((row) => <tr key={row.id}><td><span className="table-id"><SearchHighlight text={row.id} query={query} /></span></td><td><strong><SearchHighlight text={row.name} query={query} /></strong><small><SearchHighlight text={`${row.from} → ${row.to}`} query={query} /></small></td><td>{fmt(row.length_km, 2)} km</td><td><b className="accent-number">+{row.newly_connected}</b></td><td>{row.merges_network ? <StatusBadge tone="purple">Şəbəkəni birləşdirir</StatusBadge> : row.links_transit_hub ? <StatusBadge tone="blue">Hub-a bağlanır</StatusBadge> : <span className="muted-text">Last-mile əlaqə</span>}</td><td><StatusBadge tone={row.selected ? 'mint' : 'gray'}>{row.selected ? 'Prioritet' : 'Gözləmə'}</StatusBadge></td></tr>)}</tbody></table></div></Panel></>
 }
 
 function HubsView({ hubs }) {
   const selected = hubs.filter((hub) => hub.selected).sort((a, b) => a.rank - b.rank)
   const candidateRows = hubs.filter((hub) => !hub.selected).sort((a, b) => b.n_lines - a.n_lines)
   const candidates = candidateRows.slice(0, 5)
-  return <><SectionHeader eyebrow="MOBILITY HUB PLANLAŞDIRMA" title="Mobility hub-lar" description="Avtovağzal, metro, avtobus xətləri və mikromobillik məntəqələrini eyni qovşaqda inteqrasiya edin." action={<button className="secondary-button" type="button" onClick={() => downloadCsv('routora-hub-namizedleri.csv', candidateRows)}><Icon name="download" size={15} /> Namizəd siyahısı</button>} /><div className="hub-summary-grid"><MetricCard label="Prioritet mobility hub" value={selected.length} change={`+${selected.reduce((sum, hub) => sum + hub.n_lines, 0)}`} changeLabel="avtobus xətti əhatəsi" tone="purple" icon="pin" /><MetricCard label="İnteqrasiya olunan məntəqə" value={selected.reduce((sum, hub) => sum + hub.parkings, 0)} change="mövcud" changeLabel="yeni satınalma tələb etmir" tone="mint" icon="bike" /><MetricCard label="500 m-də sakin" value={fmt(selected.reduce((sum, hub) => sum + hub.pop, 0))} change="əhatə" changeLabel="seçilmiş hub-ların cəmi" tone="orange" icon="map" /></div><div className="dashboard-grid hubs-grid"><Panel className="wide-panel"><PanelHeader title="Prioritet mobility hub-lar" subtitle="Fayda və multimodal əlçatanlıq balına görə sıralanıb" /><div className="selected-hubs">{selected.map((hub) => <div className="selected-hub" key={hub.name}><div className="selected-hub-rank">{String(hub.rank).padStart(2, '0')}</div><div className="selected-hub-main"><span className="eyebrow">{hub.kind} · HUB</span><h3>{hub.name}</h3><p>{hub.reason}</p><div className="tag-row"><StatusBadge tone="blue">{hub.n_lines} avtobus xətti</StatusBadge><StatusBadge tone="gray">{hub.parkings} məntəqə</StatusBadge><StatusBadge tone="mint">{money(hub.cost_azn)}</StatusBadge></div></div><div className="hub-score"><b>{fmt(hub.pop)}</b><span>potensial sakin</span><div className="score-line"><i style={{ width: `${Math.min((hub.pop / 18000) * 100, 100)}%` }} /></div></div></div>)}</div></Panel><Panel><PanelHeader title="Növbəti hub namizədləri" subtitle="Yüksək xətt sıxlığı və last-mile potensialı" /><Bars items={candidates.map((hub) => ({ label: hub.name.replace(' metro', ''), value: hub.n_lines }))} formatter={(value) => `${value} xətt`} color="#36b7d8" /></Panel></div></>
+  return <><SectionHeader title="Mobility hub-lar" description="Avtovağzal, metro, avtobus xətləri və mikromobillik məntəqələrini eyni qovşaqda inteqrasiya edin." action={<button className="secondary-button" type="button" onClick={() => downloadCsv('routora-hub-namizedleri.csv', candidateRows)}><Icon name="download" size={15} /> Namizəd siyahısı</button>} /><div className="hub-summary-grid"><MetricCard label="Prioritet mobility hub" value={selected.length} change={`+${selected.reduce((sum, hub) => sum + hub.n_lines, 0)}`} changeLabel="avtobus xətti əhatəsi" tone="purple" icon="pin" /><MetricCard label="İnteqrasiya olunan məntəqə" value={selected.reduce((sum, hub) => sum + hub.parkings, 0)} change="mövcud" changeLabel="yeni satınalma tələb etmir" tone="mint" icon="bike" /><MetricCard label="500 m-də sakin" value={fmt(selected.reduce((sum, hub) => sum + hub.pop, 0))} change="əhatə" changeLabel="seçilmiş hub-ların cəmi" tone="orange" icon="map" /></div><div className="dashboard-grid hubs-grid"><Panel className="wide-panel"><PanelHeader title="Prioritet mobility hub-lar" subtitle="Fayda və multimodal əlçatanlıq balına görə sıralanıb" /><div className="selected-hubs">{selected.map((hub) => <div className="selected-hub" key={hub.name}><div className="selected-hub-rank">{String(hub.rank).padStart(2, '0')}</div><div className="selected-hub-main"><h3>{hub.name}</h3><p>{hub.reason}</p><div className="tag-row"><StatusBadge tone="blue">{hub.n_lines} avtobus xətti</StatusBadge><StatusBadge tone="gray">{hub.parkings} məntəqə</StatusBadge></div></div><div className="hub-score"><b>{fmt(hub.pop)}</b><span>potensial sakin</span><div className="score-line"><i style={{ width: `${Math.min((hub.pop / 18000) * 100, 100)}%` }} /></div></div></div>)}</div></Panel><Panel><PanelHeader title="Növbəti hub namizədləri" subtitle="Yüksək xətt sıxlığı və last-mile potensialı" /><Bars items={candidates.map((hub) => ({ label: hub.name.replace(' metro', ''), value: hub.n_lines }))} formatter={(value) => `${value} xətt`} color="#36b7d8" /></Panel></div></>
 }
 
 export default App

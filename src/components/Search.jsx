@@ -33,8 +33,8 @@ export function SearchCard({ as: Tag = 'article', title, className = '', childre
   return <Tag className={`${className} ${searchClass(match)}`}>{children}</Tag>
 }
 
-export function Mark({ text }) {
-  const { folded } = useSearch()
+export function HighlightText({ text, query }) {
+  const folded = fold(String(query ?? '').trim())
   if (!folded || typeof text !== 'string') return text ?? null
   const source = Array.from(text)
   const haystack = fold(text)
@@ -50,4 +50,15 @@ export function Mark({ text }) {
   if (!parts.length) return text
   if (from < source.length) parts.push(source.slice(from).join(''))
   return <>{parts}</>
+}
+
+// Use the local list query when present; otherwise fall back to the global navbar query.
+export function SearchHighlight({ text, query = '' }) {
+  const { query: globalQuery } = useSearch()
+  return <HighlightText text={text} query={query.trim() || globalQuery} />
+}
+
+export function Mark({ text }) {
+  const { query } = useSearch()
+  return <HighlightText text={text} query={query} />
 }

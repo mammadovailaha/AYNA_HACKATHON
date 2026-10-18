@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Icon from './Icon'
-import { fold } from './Search'
+import { fold, SearchHighlight } from './Search'
 
 /**
  * Xəritənin sol panelində hub siyahısı. Hər hub ayrıca checkbox ilə idarə olunur:
@@ -9,6 +9,17 @@ import { fold } from './Search'
  */
 export default function HubList({ hubs, loading, error, visible, onToggle, onSetAll, selectedHub, onSelect }) {
   const [filter, setFilter] = useState('')
+  const located = useMemo(() => (hubs ?? []).filter((hub) => hub.coordinates), [hubs])
+  const selectAllRef = useRef(null)
+  const allLocatedSelected = located.length > 0 && located.every((hub) => visible.has(hub.id))
+  const someLocatedSelected = located.some((hub) => visible.has(hub.id))
+
+  useEffect(() => {
+    if (selectAllRef.current) {
+      selectAllRef.current.indeterminate = someLocatedSelected && !allLocatedSelected
+    }
+  }, [allLocatedSelected, someLocatedSelected])
+
   const groups = useMemo(() => {
     const term = fold(filter.trim())
     const list = (hubs ?? []).filter((hub) => !term || fold(`${hub.name} ${hub.id}`).includes(term))
@@ -24,11 +35,24 @@ export default function HubList({ hubs, loading, error, visible, onToggle, onSet
   if (error) return <div className="hub-list-panel state error"><Icon name="alert" size={20} /><span>Hub siyahısı yüklənmədi: {error}</span></div>
   if (!hubs?.length) return <div className="hub-list-panel state"><Icon name="pin" size={20} /><span>Datasetdə hub tapılmadı.</span></div>
 
-  const located = hubs.filter((hub) => hub.coordinates)
   return <div className="hub-list-panel">
     <div className="hub-list-head">
       <b>Hub-lar <span>{visible.size}/{located.length}</span></b>
-      <div className="hub-list-actions"><button type="button" onClick={() => onSetAll(true)}>Hamısı</button><button type="button" onClick={() => onSetAll(false)}>Heç biri</button></div>
+      <div className="hub-list-actions">
+        <button type="button" onClick={() => onSetAll(true)}>Hamısı</button>
+        <label className="hub-select-all" title="Hamısı">
+          <input
+            ref={selectAllRef}
+            type="checkbox"
+            checked={allLocatedSelected}
+            disabled={!located.length}
+            onChange={(event) => onSetAll(event.currentTarget.checked)}
+            aria-label="Hamısı"
+            aria-checked={someLocatedSelected && !allLocatedSelected ? 'mixed' : allLocatedSelected ? 'true' : 'false'}
+            title="Hamısı"
+          />
+        </label>
+      </div>
     </div>
     <input className="hub-list-filter" type="search" value={filter} onChange={(event) => setFilter(event.target.value)} placeholder="Hub axtar…" aria-label="Hub siyahısında axtar" />
     <div className="hub-list-scroll">
@@ -43,7 +67,7 @@ export default function HubList({ hubs, loading, error, visible, onToggle, onSet
               <span className={`hub-dot ${hub.status}`} aria-hidden="true">{hub.priority.rank ?? ''}</span>
             </label>
             <button type="button" className="hub-list-name" disabled={disabled} onClick={() => onSelect(hub.id)} title="Xəritədə fokusla və detallara bax">
-              <span>{hub.name}</span><small>{hub.id}{disabled ? ' · koordinat yoxdur' : ''}</small>
+              <span><SearchHighlight text={hub.name} query={filter} /></span><small><SearchHighlight text={`${hub.id}${disabled ? ' · koordinat yoxdur' : ''}`} query={filter} /></small>
             </button>
           </div>
         })}

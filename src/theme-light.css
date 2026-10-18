@@ -28,8 +28,7 @@ body { background: #f6f8fc; -webkit-font-smoothing: antialiased; }
 .main-nav button em { background: var(--blue-50); color: var(--blue-700); }
 .main-nav button.active em { background: rgba(255, 255, 255, .22); color: #fff; }
 .status-card { border-color: var(--line); }
-.user-card b { color: var(--ink); }
-.status-card small, .user-card small { color: #94a3b8; }
+.status-card small { color: #94a3b8; }
 .sidebar-backdrop { background: rgba(15, 27, 51, .35); }
 
 /* Düymələr və badge-lər */
@@ -43,9 +42,7 @@ body { background: #f6f8fc; -webkit-font-smoothing: antialiased; }
 .tone-purple .metric-icon { background: var(--blue-50); color: var(--blue-600); }
 .tone-mint .metric-icon { background: var(--green-50); color: var(--green-600); }
 .panel, .metric-card, .comparison-stat { box-shadow: var(--shadow-sm); }
-.eyebrow.mint { color: var(--green-600); }
-
-/* Hero və maliyyə banneri → açıq */
+/* Hero banneri → açıq */
 .hero-banner { color: var(--ink); background: radial-gradient(circle at 76% 50%, #dbeafe 0, transparent 38%), linear-gradient(115deg, #ffffff 0%, #f3f8ff 55%, #e8f2ff 100%); border: 1px solid #dfe8f6; }
 .hero-copy h1 { color: var(--ink); }
 .hero-copy h1 em { color: var(--blue-600); }
@@ -345,9 +342,11 @@ button.mode-chip:hover, button.mode-chip:focus-visible { border-color: var(--blu
 .hub-list-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 12px 8px; }
 .hub-list-head b { color: var(--ink); font-size: 13px; }
 .hub-list-head b span { margin-left: 4px; color: #64748b; font: 600 11px 'DM Mono', monospace; }
-.hub-list-actions { display: flex; gap: 4px; }
+.hub-list-actions { display: flex; align-items: center; gap: 4px; }
 .hub-list-actions button { padding: 3px 7px; border-radius: 6px; background: #f1f5fb; color: #475569; font-size: 10.5px; font-weight: 600; }
 .hub-list-actions button:hover { color: var(--blue-700); }
+.hub-select-all { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; flex: 0 0 auto; cursor: pointer; }
+.hub-select-all input { width: 16px; height: 16px; margin: 0; accent-color: var(--blue-600); cursor: pointer; }
 .hub-list-filter { margin: 0 12px 8px; padding: 7px 9px; border: 1px solid var(--line); border-radius: 8px; font-size: 12px; outline: none; }
 .hub-list-filter:focus { border-color: var(--blue-600); }
 .hub-list-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 0 6px 10px; }
@@ -388,6 +387,211 @@ button.mode-chip:hover, button.mode-chip:focus-visible { border-color: var(--blu
   .top-search { display: flex; width: auto; flex: 1; max-width: 260px; }
   .top-search kbd { display: none; }
 }
+
+@media (min-width: 841px) {
+  .hub-list-head { flex-wrap: nowrap; }
+  .hub-list-head > b { min-width: 0; white-space: nowrap; }
+  .hub-list-actions { flex: 0 0 auto; flex-wrap: nowrap; white-space: nowrap; }
+  .hub-list-actions button { padding-inline: 5px; }
+  .hub-dot,
+  .hub-dot.candidate { width: 24px; height: 24px; font-size: 14px; line-height: 1; }
+}
 @media (max-width: 840px) {
   .network-workspace.is-expanded .gis-map-wrap > .gis-map { height: auto; flex: 1; min-height: 0; }
+}
+
+/* Desktop readability floor. Mobile typography keeps its existing responsive
+   scale; only the web layout is normalised to a minimum of 14px. */
+@media (min-width: 841px) {
+  .loading-screen p,
+  .error-screen small,
+  .app-shell .brand span,
+  .app-shell .nav-caption,
+  .app-shell .main-nav button,
+  .app-shell .main-nav button em,
+  .app-shell .status-card b,
+  .app-shell .status-card small,
+  .app-shell .breadcrumb,
+  .app-shell .top-search,
+  .app-shell .top-search kbd,
+  .app-shell .section-header p,
+  .app-shell .secondary-button,
+  .app-shell .primary-button,
+  .app-shell .hero-copy p,
+  .app-shell .hero-meta span,
+  .app-shell .network-core span,
+  .app-shell .metric-label,
+  .app-shell .metric-change,
+  .app-shell .metric-change-label,
+  .app-shell .panel-header h3,
+  .app-shell .panel-header p,
+  .app-shell .text-button,
+  .app-shell .status-badge,
+  .app-shell .chart-axis,
+  .app-shell .chart-label,
+  .app-shell .chart-value,
+  .app-shell .chart-footnote,
+  .app-shell .chart-footnote b,
+  .app-shell .donut-hole span,
+  .app-shell .legend-row,
+  .app-shell .legend-row b,
+  .app-shell .priority-head,
+  .app-shell .priority-row,
+  .app-shell .priority-row strong,
+  .app-shell .priority-row small,
+  .app-shell .hub-main strong,
+  .app-shell .hub-main span,
+  .app-shell .hub-pop b,
+  .app-shell .hub-pop span,
+  .app-shell .input-search input,
+  .app-shell .filter-toggle,
+  .app-shell .result-count,
+  .app-shell .data-table th,
+  .app-shell .data-table td,
+  .app-shell .data-table td strong,
+  .app-shell .data-table td small,
+  .app-shell .table-id,
+  .app-shell .accent-number,
+  .app-shell .muted-text,
+  .app-shell .map-legend,
+  .app-shell .map-footer,
+  .app-shell .map-footer b,
+  .app-shell .selected-hub-main h3,
+  .app-shell .selected-hub-main p,
+  .app-shell .hub-score b,
+  .app-shell .hub-score span,
+  .app-shell .bar-meta,
+  .app-shell .bar-meta b,
+  .app-shell .assumption-note,
+  .app-shell .loading-screen p,
+  .app-shell .error-screen small,
+  .app-shell .empty-state p,
+  .app-shell .comparison-stat > span,
+  .app-shell .compare-footer,
+  .app-shell .compare-footer b,
+  .app-shell .rt-pill,
+  .app-shell .rt-card .rt-head,
+  .app-shell .rt-sync,
+  .app-shell .rt-card dt,
+  .app-shell .rt-card dd,
+  .app-shell .rt-error,
+  .app-shell .rt-note,
+  .app-shell .infra-tag,
+  .app-shell .infra-label,
+  .app-shell .infra-label small,
+  .app-shell .verify-badge,
+  .app-shell .recalc-table,
+  .app-shell .recalc-table th,
+  .app-shell .recalc-table td,
+  .app-shell .infra-split span,
+  .app-shell .growth-chart .axis-label,
+  .app-shell .growth-chart .bar-value,
+  .app-shell .growth-chart .bar-label,
+  .app-shell .growth-chart .bar-sub,
+  .app-shell .growth-legend,
+  .app-shell .compare-table-head,
+  .app-shell .compare-table-row,
+  .app-shell .compare-table-row b,
+  .app-shell .delta,
+  .app-shell .compare-note,
+  .app-shell .map-layer-toggle em,
+  .app-shell .heat-metric,
+  .app-shell .heat-metric button,
+  .app-shell .gis-map-overlay,
+  .app-shell .gis-legend,
+  .app-shell .gis-legend b,
+  .app-shell .gis-tooltip .maplibregl-popup-content,
+  .app-shell .gis-tooltip .maplibregl-popup-content span,
+  .app-shell .hub-details.empty p,
+  .app-shell .hub-details-head small,
+  .app-shell .hub-status-chip,
+  .app-shell .hub-facts dt,
+  .app-shell .hub-facts dd,
+  .app-shell .missing,
+  .app-shell .hub-block h4,
+  .app-shell .hub-block ul,
+  .app-shell .line-chips span,
+  .app-shell .hub-reason,
+  .app-shell .priority-meter div:first-child,
+  .app-shell .priority-meter small,
+  .app-shell .hub-missing,
+  .app-shell .unlocated-list span,
+  .app-shell .dq-list,
+  .app-shell .top-search input,
+  .app-shell .search-status,
+  .app-shell .preset-note,
+  .app-shell .preset-note button,
+  .app-shell .hub-list-panel.state,
+  .app-shell .hub-list-head b,
+  .app-shell .hub-list-head b span,
+  .app-shell .hub-list-actions button,
+  .app-shell .hub-list-filter,
+  .app-shell .hub-list-empty,
+  .app-shell .hub-list-group > small,
+  .app-shell .hub-list-name span,
+  .app-shell .hub-list-name small,
+  .app-shell .hub-dot,
+  .app-shell .maplibregl-map,
+  .app-shell .maplibregl-ctrl,
+  .app-shell .maplibregl-ctrl *,
+  .app-shell.sidebar-collapsed .main-nav button em,
+  .app-shell.sidebar-collapsed .main-nav button[data-tooltip]::after,
+  .app-shell.sidebar-collapsed .status-card[data-tooltip]::after {
+    font-size: 14px;
+  }
+}
+
+/* Desktop navigation and component typography refinements. */
+@media (min-width: 841px) {
+  .app-shell .priority-row,
+  .app-shell .priority-row * {
+    font-family: "SF Pro Display", "SF Pro Text", "SF Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  .app-shell .heat-metric,
+  .app-shell .heat-metric button {
+    font-size: 16px;
+  }
+
+  .app-shell .main-nav button.active {
+    color: var(--blue-600);
+    background: var(--blue-50);
+    font-weight: 700;
+    box-shadow: none;
+  }
+
+  .app-shell .main-nav button.active .icon {
+    color: var(--blue-600);
+  }
+
+  .app-shell .main-nav button.active em {
+    background: var(--blue-100);
+    color: var(--blue-700);
+  }
+
+  .app-shell .main-nav button.active::before {
+    left: auto;
+    right: -16px;
+    width: 3px;
+    height: 28px;
+    background: var(--blue-600);
+    border-radius: 3px 0 0 3px;
+  }
+
+  .app-shell.sidebar-collapsed .main-nav button.active::before {
+    left: auto;
+    right: -5px;
+  }
+}
+
+/* The dashboard uses one consistent UI typeface across every component. */
+.app-shell,
+.app-shell.app-shell *,
+.app-shell.app-shell *::before,
+.app-shell.app-shell *::after {
+  font-family: var(--font-sf-pro);
+}
+
+.app-shell .data-table th {
+  font-family: var(--font-sf-pro);
 }
