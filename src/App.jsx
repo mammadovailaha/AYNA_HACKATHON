@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Icon from './components/Icon'
-import { AreaChart, Bars } from './components/Charts'
-import { MetricCard, Panel, PanelHeader, SectionHeader, StatusBadge } from './components/Ui'
+import { AreaChart, Bars, DonutChart } from './components/Charts'
+import { MetricCard, Panel, PanelHeader, SectionHeader, StatusBadge, ViewModeToggle } from './components/Ui'
 import { useDashboardData } from './hooks/useDashboardData'
 import { useLiveDashboard } from './hooks/useLiveDashboard'
 import NetworkMap from './components/NetworkMap'
-import { ComparisonTable, InfrastructureCards, InfrastructureGrowthChart, LaneRecalculation, RealtimeStatus, VerificationBadge } from './components/Infrastructure'
+import { ComparisonTable, InfrastructureCards, LaneRecalculation, RealtimeStatus, VerificationBadge } from './components/Infrastructure'
 import { fold, Mark, SearchCard, SearchHighlight, SearchProvider } from './components/Search'
 
 const BRAND = 'ROUTORA'
@@ -17,6 +17,12 @@ const navItems = [
   { id: 'connections', label: 'Last-mile bağlantılar', icon: 'route' },
   { id: 'hubs', label: 'Mobility hub-lar', icon: 'pin' }
 ]
+
+const getViewFromHash = () => {
+  if (typeof window === 'undefined') return 'overview'
+  const value = window.location.hash.replace(/^#\/?/, '')
+  return navItems.some((item) => item.id === value) ? value : 'overview'
+}
 
 // Banner kateqoriyaları → Hub xəritəsində qat dəsti və fokus (data API-dən gəlir)
 const MAP_CATEGORIES = {
@@ -65,7 +71,7 @@ const findSearchView = (query, data) => {
 
 function App() {
   const { data, loading, error } = useDashboardData()
-  const [activeView, setActiveView] = useState('overview')
+  const [activeView, setActiveView] = useState(getViewFromHash)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -73,6 +79,16 @@ function App() {
   const [mapCategory, setMapCategory] = useState(null)
   const searchInput = useRef(null)
   const searchTarget = useMemo(() => findSearchView(query, data), [query, data])
+
+  useEffect(() => {
+    const syncViewFromUrl = () => setActiveView(getViewFromHash())
+    window.addEventListener('hashchange', syncViewFromUrl)
+    window.addEventListener('popstate', syncViewFromUrl)
+    return () => {
+      window.removeEventListener('hashchange', syncViewFromUrl)
+      window.removeEventListener('popstate', syncViewFromUrl)
+    }
+  }, [])
 
   // Axtarış qısayolu: Win/⌘ + K (Windows Win+K-nı sistem üçün tutur), Ctrl + K və "/" alternativdir
   useEffect(() => {
@@ -101,14 +117,21 @@ function App() {
   const { summary, connections, hubs } = data
   const viewTitle = navItems.find((item) => item.id === activeView)?.label ?? 'Ümumi baxış'
 
-  const handleNavClick = (viewId) => {
+  const navigateToView = (viewId) => {
     setActiveView(viewId)
+    if (window.location.hash !== `#${viewId}`) {
+      window.history.pushState({ view: viewId }, '', `#${viewId}`)
+    }
+  }
+
+  const handleNavClick = (viewId) => {
+    navigateToView(viewId)
     setSidebarOpen(false)
     if (viewId === 'map') setMapCategory(null)
   }
   const openCategory = (key) => {
     setMapCategory({ key, nonce: Date.now() })
-    setActiveView('map')
+    navigateToView('map')
     window.scrollTo({ top: 0 })
   }
   const jumpToFirstHit = () => {
@@ -118,7 +141,7 @@ function App() {
       return
     }
     if (!searchTarget) return
-    setActiveView(searchTarget)
+    navigateToView(searchTarget)
     setSidebarOpen(false)
     requestAnimationFrame(() => document.querySelector('.content-wrap .search-hit')?.scrollIntoView({ behavior: 'smooth', block: 'center' }))
   }
@@ -151,6 +174,8 @@ function App() {
 }
 
 function Overview({ summary, connections, hubs, onCategory }) {
+  const [lastMileView, setLastMileView] = useState('table')
+  const [hubView, setHubView] = useState('table')
   const live = useLiveDashboard().data
   const infra = live.summary.infrastructure
   const phases = summary.phases
@@ -159,6 +184,9 @@ function Overview({ summary, connections, hubs, onCategory }) {
   const scenarioYear = current.label.match(/\b\d{4}\b/)?.[0] ?? 'İNDİ'
   const selectedConnections = connections.filter((row) => row.selected)
   const selectedHubs = hubs.filter((row) => row.selected).sort((a, b) => a.rank - b.rank)
+  const featuredConnections = selectedConnections.slice(0, 5)
+  const featuredHubs = selectedHubs.slice(0, 4)
+  const hubPopulationTotal = featuredHubs.reduce((sum, hub) => sum + hub.pop, 0)
   const coverageChange = ((future.coverage_pct - current.coverage_pct) / current.coverage_pct * 100).toFixed(1)
   const reportRows = [
     { göstərici: 'Mövcud velosiped infrastrukturu', dəyər: `${fmt(infra.existing_km, 1)} km`, qeyd: 'Tikilib' },
@@ -188,11 +216,21 @@ function Overview({ summary, connections, hubs, onCategory }) {
     <SectionHeader title="Mövcud və planlaşdırılan şəbəkə" description="Mövcud yollar tikilib; əlavə hissə planlaşdırılır və hələ tikilməyib. Ümumi uzunluq və artım faizi API-də avtomatik hesablanır." />
     <div className="infra-layout">
       <InfrastructureCards infra={infra} />
-      <Panel className="growth-panel"><PanelHeader title="İnfrastruktur artımı" subtitle="BEFORE → ADDITION → PROJECTED TOTAL" action={<StatusBadge tone="mint">+{fmt(infra.growth_pct, 2)}%</StatusBadge>} /><InfrastructureGrowthChart infra={infra} /></Panel>
+      <Panel className="growth-panel"><PanelHeader title="Velo zolaqlarının paylanması" subtitle="MÖVCUD → ƏLAVƏ (TƏKLİF OLUNAN)" action={<StatusBadge tone="mint">+{fmt(infra.growth_pct, 2)}%</StatusBadge>} /><DonutChart className="network-share-chart" segments={[{ label: 'Mövcud velosiped zolaqları', value: infra.existing_km, color: '#7b8fb3' }, { label: 'Əlavə (təklif olunan) zolaqlar', value: infra.planned_addition_km, color: 'var(--blue)' }]} centerValue={`${fmt(infra.projected_total_km, 1)} km`} centerLabel="təklif olunan şəbəkə" valueSuffix=" km" showPercent /></Panel>
       <Panel className="realtime-panel"><PanelHeader title="Real-time data statusu" subtitle="Server-Sent Events" /><RealtimeStatus /></Panel>
       <Panel className="comparison-panel"><PanelHeader title="Mövcud vs planlaşdırılan" subtitle="Plan tətbiq olunduqdan sonrakı proqnoz" /><ComparisonTable comparison={live.comparison} /></Panel>
     </div>
-    <div className="dashboard-grid overview-grid"><Panel className="coverage-panel wide-panel"><PanelHeader title="Vahid şəbəkə əhatəsi" subtitle="Avtobus · metro · velo · hub" action={<StatusBadge tone="mint">+{fmt(future.coverage_pct - current.coverage_pct, 1)} pp</StatusBadge>} /><AreaChart values={phaseKeys.map((key) => phases[key].coverage_pct)} labels={['2025', '2026', 'Ssenari']} /><div className="chart-footnote"><span><i className="legend-dot purple" />Zolaq və hub-a 300 m-də yaşayan sakin</span><b>{fmt(future.coverage_pop)} nəfər</b></div></Panel><Panel className="wide-panel"><PanelHeader title="Last-mile prioritetləri" subtitle={`${selectedConnections.length} bağlantı seçilib · təsir və əlaqələndirmə potensialına görə`} /><div className="priority-table"><div className="priority-head"><span>İSTİQAMƏT</span><span>UZUNLUQ</span><span>YENİ MƏNTƏQƏ</span><span>STATUS</span></div>{selectedConnections.slice(0, 5).map((row) => <div className="priority-row" key={row.id}><div><strong>{row.name}</strong><small>{row.from} → {row.to}</small></div><b>{fmt(row.length_km, 2)} km</b><b>{row.newly_connected}</b><StatusBadge tone="mint">Seçildi</StatusBadge></div>)}</div></Panel><Panel className="wide-panel hub-panel"><PanelHeader title="Prioritet mobility hub-lar" subtitle="Avtobus, metro və mikromobillik inteqrasiya nöqtələri" /><div className="hub-list">{selectedHubs.slice(0, 4).map((hub) => <div className="hub-item" key={hub.name}><span className="hub-rank">0{hub.rank}</span><div className="hub-main"><strong>{hub.name}</strong><span><Icon name="route" size={13} /> {hub.n_lines} avtobus xətti <i /> <Icon name="pin" size={13} /> {hub.parkings} məntəqə</span></div><div className="hub-pop"><b>{fmt(hub.pop)}</b><span>500 m-də sakin</span></div><Icon name="chevron" size={16} className="muted-icon" /></div>)}</div></Panel></div>
+    <div className="dashboard-grid overview-grid">
+      <Panel className="coverage-panel wide-panel"><PanelHeader title="Vahid şəbəkə əhatəsi" subtitle="Avtobus · metro · velo · hub" action={<StatusBadge tone="mint">+{fmt(future.coverage_pct - current.coverage_pct, 1)} pp</StatusBadge>} /><AreaChart values={phaseKeys.map((key) => phases[key].coverage_pct)} labels={['2025', '2026', 'Ssenari']} /><div className="chart-footnote"><span><i className="legend-dot purple" />Zolaq və hub-a 300 m-də yaşayan sakin</span><b>{fmt(future.coverage_pop)} nəfər</b></div></Panel>
+      <Panel className="wide-panel">
+        <PanelHeader title="Last-mile prioritetləri" subtitle={`${selectedConnections.length} bağlantı seçilib · təsir və əlaqələndirmə potensialına görə`} action={<ViewModeToggle value={lastMileView} onChange={setLastMileView} />} />
+        {lastMileView === 'table' ? <div className="priority-table"><div className="priority-head"><span>İSTİQAMƏT</span><span>UZUNLUQ</span><span>YENİ MƏNTƏQƏ</span><span>STATUS</span></div>{featuredConnections.map((row) => <div className="priority-row" key={row.id}><div><strong>{row.name}</strong><small>{row.from} → {row.to}</small></div><b>{fmt(row.length_km, 2)} km</b><b>{row.newly_connected}</b><StatusBadge tone="mint">Seçildi</StatusBadge></div>)}</div> : <div className="chart-view priority-chart"><div className="chart-context"><span><i className="legend-dot purple" />Təsir balı üzrə prioritet bağlantılar</span><b>{featuredConnections.reduce((sum, row) => sum + row.newly_connected, 0)} yeni məntəqə</b></div><Bars items={featuredConnections.map((row) => ({ label: `${row.id} · ${row.name}`, value: row.benefit }))} formatter={(value) => `${value} bal`} color="#7569ee" /></div>}
+      </Panel>
+      <Panel className="wide-panel hub-panel">
+        <PanelHeader title="Prioritet mobility hub-lar" subtitle="Avtobus, metro və mikromobillik inteqrasiya nöqtələri" action={<ViewModeToggle value={hubView} onChange={setHubView} />} />
+        {hubView === 'table' ? <div className="hub-list">{featuredHubs.map((hub) => <div className="hub-item" key={hub.name}><span className="hub-rank">0{hub.rank}</span><div className="hub-main"><strong>{hub.name}</strong><span><Icon name="route" size={13} /> {hub.n_lines} avtobus xətti <i /> <Icon name="pin" size={13} /> {hub.parkings} məntəqə</span></div><div className="hub-pop"><b>{fmt(hub.pop)}</b><span>500 m-də sakin</span></div><Icon name="chevron" size={16} className="muted-icon" /></div>)}</div> : <div className="chart-view hub-distribution-chart"><div className="chart-context"><span><i className="legend-dot mint" />500 m-də sakinlərin hub-lar üzrə payı</span><b>{fmt(hubPopulationTotal)} sakin</b></div><DonutChart segments={featuredHubs.map((hub) => ({ label: hub.name, value: hub.pop }))} centerValue={fmt(hubPopulationTotal)} centerLabel="ümumi sakin" valueSuffix=" nəfər" /></div>}
+      </Panel>
+    </div>
   </>
 }
 

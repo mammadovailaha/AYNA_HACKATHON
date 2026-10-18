@@ -18,6 +18,13 @@ export function Panel({ children, className = '', searchTitle }) {
 
 export function PanelHeader({ title, subtitle, action }) { return <div className="panel-header"><div><h3><Mark text={title} /></h3>{subtitle && <p>{subtitle}</p>}</div>{action}</div> }
 
+export function ViewModeToggle({ value, onChange }) {
+  return <div className="view-mode-toggle" role="group" aria-label="Görünüş seçimi">
+    <button type="button" className={value === 'table' ? 'active' : ''} aria-pressed={value === 'table'} onClick={() => onChange('table')}>Cədvəl</button>
+    <button type="button" className={value === 'chart' ? 'active' : ''} aria-pressed={value === 'chart'} onClick={() => onChange('chart')}>Chart</button>
+  </div>
+}
+
 export function MetricCard({ label, value, change, changeLabel, icon, tone = 'purple', sparkline }) {
   const match = useSearchMatch(label)
   return <article className={`metric-card tone-${tone} ${searchClass(match)}`}><div className="metric-top"><span className="metric-label"><Mark text={label} /></span><span className="metric-icon"><Icon name={icon} size={20} /></span></div><div className="metric-value">{value}</div><div className="metric-bottom">{change && <span className={`metric-change ${change.startsWith('-') ? 'negative' : ''}`}><Icon name={change.startsWith('-') ? 'arrowDown' : 'arrowUp'} size={13} /> {change}</span>}<span className="metric-change-label">{changeLabel}</span>{sparkline && <span className="metric-spark"><img alt="" src={sparkline} /></span>}</div></article>
