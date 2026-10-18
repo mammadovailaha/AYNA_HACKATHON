@@ -23,7 +23,6 @@ export function InfrastructureCards({ infra }) {
       <div className="infra-card-top"><span className="infra-icon blue"><Icon name="route" size={20} /></span><span className="infra-tag built">Tikilib</span></div>
       <span className="infra-label"><Mark text="Mövcud velosiped infrastrukturu" /> <small>({sourceLabel})</small></span>
       <strong className="infra-value">{km(infra.existing_km)}</strong>
-      <VerificationBadge check={infra.verification?.existing} label="Mövcud" />
       <div className="infra-split">
         <div><span>Planlaşdırılan ümumi uzunluq</span><b>{km(infra.projected_total_km)}</b></div>
         <div><span>Hesablama</span><b>{fmt(infra.existing_km, 1)} + {fmt(infra.planned_addition_km, 1)}</b></div>
@@ -33,7 +32,6 @@ export function InfrastructureCards({ infra }) {
       <div className="infra-card-top"><span className="infra-icon green"><Icon name="arrowUp" size={20} /></span><span className="infra-tag planned">Planlaşdırılır</span></div>
       <span className="infra-label"><Mark text="Yeni əlavə ediləcək hissə" /></span>
       <strong className="infra-value green">+{km(infra.planned_addition_km)}</strong>
-      <VerificationBadge check={infra.verification?.planned} label="Planlaşdırılan" />
       <div className="infra-split">
         <div><span>İnfrastruktur artımı</span><b className="green">{fmt(infra.growth_pct, 2)}%</b></div>
         <div><span>Hesablama</span><b>{fmt(infra.planned_addition_km, 1)} / {fmt(infra.existing_km, 1)} × 100</b></div>

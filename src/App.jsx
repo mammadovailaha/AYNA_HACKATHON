@@ -81,8 +81,8 @@ function App() {
     return () => cancelAnimationFrame(frame)
   }, [query, activeView, data])
 
-  if (loading) return <div className="loading-screen"><div className="loading-mark">{BRAND}</div><div className="loader" /><p>Dashboard məlumatları hazırlanır…</p></div>
-  if (error || !data) return <div className="loading-screen error-screen"><div className="loading-mark">{BRAND}</div><h2>Data yüklənmədi</h2><p>{error || 'Naməlum xəta'}</p><small>API serverinin işlədiyinə əmin olun (npm run dev və ya npm start).</small></div>
+  if (loading) return <div className="loading-screen"><img className="loading-logo" src="/assets/routora.png" alt={BRAND} /><div className="loader" /><p>Dashboard məlumatları hazırlanır…</p></div>
+  if (error || !data) return <div className="loading-screen error-screen"><img className="loading-logo" src="/assets/routora.png" alt={BRAND} /><h2>Data yüklənmədi</h2><p>{error || 'Naməlum xəta'}</p><small>API serverinin işlədiyinə əmin olun (npm run dev və ya npm start).</small></div>
 
   const { summary, connections, hubs, finance } = data
   const viewTitle = navItems.find((item) => item.id === activeView)?.label ?? 'Ümumi baxış'
@@ -101,10 +101,9 @@ function App() {
 
   return <div className="app-shell">
     <aside className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${sidebarOpen ? 'open' : ''}`}>
-      <div className="brand"><div className="brand-logo-slot" aria-hidden="true" /><div className="brand-copy"><strong>{BRAND}</strong><span>Mobility hub intelligence</span></div><button className="sidebar-toggle" onClick={() => setSidebarCollapsed((value) => !value)} aria-label={sidebarCollapsed ? 'Sidebarı aç' : 'Sidebarı bağla'} title={sidebarCollapsed ? 'Sidebarı aç' : 'Sidebarı bağla'}><Icon name="chevron" size={17} /></button><button className="close-sidebar" onClick={() => setSidebarOpen(false)} aria-label="Menyunu bağla">×</button></div>
-      <div className="workspace-switch"><span className="workspace-dot" /><div><small>VAHİD ŞƏBƏKƏ</small><b>Bakı multimodal sistemi</b></div><Icon name="chevron" size={15} /></div>
+      <div className="brand"><img className="brand-logo brand-logo-full" src="/assets/routora-with-text.png" alt={BRAND} /><img className="brand-logo brand-logo-compact" src="/assets/routora.png" alt={BRAND} /><button className="sidebar-toggle" onClick={() => setSidebarCollapsed((value) => !value)} aria-label={sidebarCollapsed ? 'Sidebarı aç' : 'Sidebarı bağla'} title={sidebarCollapsed ? 'Sidebarı aç' : 'Sidebarı bağla'}><Icon name="chevron" size={17} /></button><button className="close-sidebar" onClick={() => setSidebarOpen(false)} aria-label="Menyunu bağla">×</button></div>
       <nav className="main-nav"><span className="nav-caption">İDARƏETMƏ</span>{navItems.map((item) => <button key={item.id} className={activeView === item.id ? 'active' : ''} data-tooltip={item.label} aria-label={item.label} onClick={() => handleNavClick(item.id)}><Icon name={item.icon} size={18} /><span>{item.label}</span>{item.id === 'connections' && <em>{connections.filter((row) => row.selected).length}</em>}</button>)}</nav>
-      <div className="sidebar-bottom"><div className="status-card" data-tooltip="Real-time data qatı"><RealtimeStatus compact /></div><div className="user-card" data-tooltip="AYNA qərar mərkəzi"><div className="avatar">AY</div><div><b>AYNA qərar mərkəzi</b><small>İdarəetmə paneli</small></div><Icon name="user" size={20} /></div></div>
+      <div className="sidebar-bottom"><div className="status-card" data-tooltip="Real-time data qatı"><RealtimeStatus compact /></div><div className="user-card" data-tooltip="AYNA qərar mərkəzi"><img className="avatar profile-avatar" src="/assets/user_photo.jpeg" alt="AYNA qərar mərkəzi" /><div><b>AYNA qərar mərkəzi</b><small>İdarəetmə paneli</small></div><Icon name="user" size={20} /></div></div>
     </aside>
     {sidebarOpen && <button className="sidebar-backdrop" aria-label="Menyunu bağla" onClick={() => setSidebarOpen(false)} />}
     <main className="main-content">
@@ -115,7 +114,7 @@ function App() {
           {query ? <button type="button" className="search-clear" onClick={() => { setQuery(''); searchInput.current?.focus() }} aria-label="Axtarışı təmizlə"><Icon name="close" size={13} /></button> : <kbd>{isMac ? '⌘ K' : 'Ctrl K'}</kbd>}
           {hits !== null && <div className={`search-status ${hits ? '' : 'empty'}`} role="status">{hits ? `${hits} uyğun kart/diaqram · Enter — keç` : 'Nəticə tapılmadı'}</div>}
         </div>
-        <div className="top-avatar">AY</div></div></header>
+        <img className="top-avatar profile-avatar" src="/assets/user_photo.jpeg" alt="AYNA qərar mərkəzi" /></div></header>
       <SearchProvider query={query}><div className="content-wrap">
         {activeView === 'overview' && <Overview summary={summary} connections={connections} hubs={hubs} finance={finance} onCategory={openCategory} />}
         {activeView === 'map' && <MapView category={mapCategory} onClearCategory={() => setMapCategory(null)} />}
@@ -155,10 +154,6 @@ function Overview({ summary, connections, hubs, finance, onCategory }) {
         <h1>Son mili tamamla,<br /><em>şəbəkəni vahid sistemə çevir.</em></h1>
         <p>{BRAND} avtobus və metro qovşaqlarını, velo zolaqlarını və mikromobillik məntəqələrini birləşdirərək mövcud {fmt(infra.existing_km, 1)} km şəbəkəni +{fmt(infra.planned_addition_km, 1)} km planlaşdırılan bağlantı ilə {fmt(infra.projected_total_km, 1)} km vahid last-mile sisteminə çevirir.</p>
         <nav className="system-flow" aria-label="Kateqoriyanı xəritədə aç">{Object.entries(MAP_CATEGORIES).map(([key, cat], index) => <React.Fragment key={key}>{index > 0 && <i aria-hidden="true">→</i>}<button type="button" className={`mode-chip chip-${key}`} onClick={() => onCategory(key)} title={`${cat.note} — xəritədə aç`}><Icon name={cat.icon} size={17} /> {cat.label}</button></React.Fragment>)}</nav>
-        <div className="hero-meta">
-          <div><b>{money(summary.capex_azn)}</b><span>ümumi kapital xərci</span></div>
-          <div><b>{summary.months} ay</b><span>təxmini icra müddəti</span></div>
-        </div>
       </div>
       <div className="hero-visual" aria-hidden="true">
         <div className="network-map" />

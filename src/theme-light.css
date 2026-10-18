@@ -20,9 +20,7 @@ body { background: #f6f8fc; -webkit-font-smoothing: antialiased; }
 .brand span { color: #8a97ab; }
 .sidebar-toggle, .close-sidebar { color: #8a97ab; }
 .sidebar-toggle:hover { color: var(--ink); background: #f1f5fb; }
-.workspace-switch { background: #f6f8fc; border-color: var(--line); }
-.workspace-switch b { color: var(--ink); }
-.workspace-switch small, .nav-caption { color: #94a3b8; }
+.nav-caption { color: #94a3b8; }
 .main-nav button { color: #5b6880; }
 .main-nav button:hover { color: var(--ink); background: #f1f5fb; }
 .main-nav button.active { color: #fff; background: var(--blue-600); box-shadow: 0 8px 18px rgba(29, 111, 232, .25); }
@@ -66,6 +64,17 @@ body { background: #f6f8fc; -webkit-font-smoothing: antialiased; }
 .network-core strong { color: var(--ink); }
 .network-core span { color: #64748b; }
 .node { border-color: var(--blue-600); background: #fff; box-shadow: 0 0 10px rgba(29, 111, 232, .4); }
+
+/* Figma hero background asset: keep the data-led light theme while allowing
+   the supplied Baku network artwork to remain visible behind the visual. */
+.hero-banner {
+  background-image:
+    linear-gradient(90deg, rgba(255, 255, 255, .96) 0%, rgba(244, 249, 255, .88) 42%, rgba(225, 240, 255, .34) 100%),
+    url('/assets/banner_background.png');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
 
 
 
